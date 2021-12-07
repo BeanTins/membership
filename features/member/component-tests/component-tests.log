@@ -1,0 +1,67 @@
+2021-12-03 12:17:14 signup member Bob with email Bob@gmail.com
+2021-12-03 12:17:14 /mnt/data/membership/features/member/component-tests/awsDeploy.json
+2021-12-03 12:17:14 Error from signup member request - {"errno":-2,"syscall":"open","code":"ENOENT","path":"/mnt/data/membership/awsDeploy.json"}
+2021-12-03 12:17:14 responseCode - undefined,message - undefined
+2021-12-03 12:27:05 signup member Bob with email Bob@gmail.com
+2021-12-03 12:27:05 /mnt/data/membership/features/member/component-tests/awsDeploy.json
+2021-12-03 12:27:05 Signup member at url - https://1k5kn1mv3i.execute-api.us-east-1.amazonaws.com/prod/member/signup
+2021-12-03 12:27:06 Signup member response - 201
+2021-12-03 12:27:06 Signup member response - member created
+2021-12-03 12:27:06 responseCode - 201,message - member created
+2021-12-07 13:38:39 signup member Bob with email Bob@gmail.com
+2021-12-07 13:38:39 /mnt/data/membership/features/member/component-tests/awsDeploy.json
+2021-12-07 13:38:39 Signup member at url - https://1k5kn1mv3i.execute-api.us-east-1.amazonaws.com/prod/member/signup
+2021-12-07 13:38:40 Signup member response - 201
+2021-12-07 13:38:40 Signup member response - member created
+2021-12-07 13:38:40 responseCode - 201,message - member created
+2021-12-07 13:39:37 signup member Bob with email Bob@gmail.com
+2021-12-07 13:39:37 /mnt/data/membership/features/member/component-tests/awsDeploy.json
+2021-12-07 13:39:37 Signup member at url - https://1k5kn1mv3i.execute-api.us-east-1.amazonaws.com/prod/member/signup
+2021-12-07 13:39:38 Signup member response - 201
+2021-12-07 13:39:38 Signup member response - member created
+2021-12-07 13:39:38 responseCode - 201,message - member created
+2021-12-07 13:55:00 signup member Bob with email Bob@gmail.com
+2021-12-07 13:55:00 /mnt/data/membership/features/member/component-tests/awsDeploy.json
+2021-12-07 13:55:00 Signup member at url - https://1k5kn1mv3i.execute-api.us-east-1.amazonaws.com/prod/member/signup
+2021-12-07 13:55:01 Signup member response - 201
+2021-12-07 13:55:01 Signup member response - member created
+2021-12-07 13:55:01 responseCode - 201,message - member created
+2021-12-07 14:02:06 signup member Bob with email Bob@gmail.com
+2021-12-07 14:02:06 /mnt/data/membership/features/member/component-tests/awsDeploy.json
+2021-12-07 14:02:06 Signup member at url - https://1k5kn1mv3i.execute-api.us-east-1.amazonaws.com/prod/member/signup
+2021-12-07 14:02:07 Signup member response - 201
+2021-12-07 14:02:07 Signup member response - member created
+2021-12-07 14:02:07 responseCode - 201,message - member created
+2021-12-07 14:02:44 signup member Bob with email Bob@gmail.com
+2021-12-07 14:02:44 /mnt/data/membership/features/member/component-tests/awsDeploy.json
+2021-12-07 14:02:44 Signup member at url - https://1k5kn1mv3i.execute-api.us-east-1.amazonaws.com/prod/member/signup
+2021-12-07 14:02:44 Signup member response - 201
+2021-12-07 14:02:44 Signup member response - member created
+2021-12-07 14:02:44 responseCode - 201,message - member created
+2021-12-07 14:06:00 signup member Bob with email Bob@gmail.com
+2021-12-07 14:06:00 /mnt/data/membership/features/member/component-tests/awsDeploy.json
+2021-12-07 14:06:00 Signup member at url - https://1k5kn1mv3i.execute-api.us-east-1.amazonaws.com/prod/member/signup
+2021-12-07 14:06:00 Signup member response - 201
+2021-12-07 14:06:00 Signup member response - member created
+2021-12-07 14:06:00 responseCode - 201,message - member created
+2021-12-07 14:06:32 signup member Bob with email Bob@gmail.com
+2021-12-07 14:06:32 /mnt/data/membership/features/member/component-tests/awsDeploy.json
+2021-12-07 14:06:32 Signup member at url - https://1k5kn1mv3i.execute-api.us-east-1.amazonaws.com/prod/member/signup
+2021-12-07 14:06:32 Signup member response - 201
+2021-12-07 14:06:32 Signup member response - member created
+2021-12-07 14:06:32 responseCode - 201,message - member created
+2021-12-07 14:11:18 signup member Bob with email Bob@gmail.com
+2021-12-07 14:11:18 /mnt/data/membership/features/member/component-tests/awsDeploy.json
+2021-12-07 14:11:18 Signup member at url - https://1k5kn1mv3i.execute-api.us-east-1.amazonaws.com/prod/member/signup
+2021-12-07 14:11:19 Signup member response - 201
+2021-12-07 14:11:19 Signup member response - member created
+2021-12-07 14:11:19 responseCode - 201,message - member created
+2021-12-07 15:32:39 signup member Bob with email Bob@gmail.com
+2021-12-07 15:32:39 /mnt/data/membership/features/member/component-tests/awsDeploy.json
+2021-12-07 15:32:39 Signup member at url - https://1k5kn1mv3i.execute-api.us-east-1.amazonaws.com/prod/member/signup
+2021-12-07 15:32:40 Signup member response - 201
+2021-12-07 15:32:40 Signup member response - member created
+2021-12-07 15:32:40 responseCode - 201,message - member created
+2021-12-07 18:19:57 signup member Bob with email Bob@gmail.com
+2021-12-07 18:19:57 /mnt/data/membership/features/member/component-tests/awsDeploy.json
+2021-12-07 18:19:57 Signup member at url - https://1k5kn1mv3i.execute-api.us-east-1.amazonaws.com/prod/member/signup
