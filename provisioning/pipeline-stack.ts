@@ -17,7 +17,7 @@ export class PipelineStack extends Stack {
        synth: new CodeBuildStep("Synth", {
          input: CodePipelineSource.gitHub("BeanTins/membership", "main"),
          buildEnvironment: {
-          buildImage: codebuild.UBUNTU_14_04_NODEJS_8_11_0
+          buildImage: codebuild.STANDARD_5_0
         },
   
          // Install dependencies, build and run cdk synth
