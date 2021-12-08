@@ -20,7 +20,7 @@ export class PipelineStack extends Stack {
          // Install dependencies, build and run cdk synth
          commands: [
            "npm install",
-           "npm run build",
+           "npm run test",
            "npx cdk synth"
          ],
        }),
