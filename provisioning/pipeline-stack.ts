@@ -20,9 +20,9 @@ export class PipelineStack extends Stack {
           buildImage: codebuild.LinuxBuildImage.STANDARD_5_0
         },
   
-        installCommands: ["npm ci"],
-         // Install dependencies, build and run cdk synth
+        // Install dependencies, build and run cdk synth
          commands: [
+           "npm ci",
            "npm run build",
            "npx cdk synth"
          ],
