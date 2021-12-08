@@ -14,13 +14,14 @@ export class PipelineStack extends Stack {
       pipelineName: "MembershipPipeline",
 
        // How it will be built and synthesized
-       synth: new ShellStep('Synth', {
-         input: CodePipelineSource.gitHub('BeanTins/membership', 'main'),
+       synth: new ShellStep("Synth", {
+         input: CodePipelineSource.gitHub("BeanTins/membership", "main"),
          
          // Install dependencies, build and run cdk synth
          commands: [
-           'npm run build',
-           'npx cdk synth'
+           "npm ci",
+           "npm run build",
+           "npx cdk synth"
          ],
        }),
     });
