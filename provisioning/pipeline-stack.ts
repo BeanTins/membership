@@ -9,17 +9,13 @@ export class PipelineStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    const oauth = SecretValue.ssmSecure("github-pat", "1")
-
     const pipeline = new CodePipeline(this, "Pipeline", {
       // The pipeline name
-      pipelineName: "membership pipeline",
+      pipelineName: "MembershipPipeline",
 
        // How it will be built and synthesized
        synth: new ShellStep('Synth', {
-         input: CodePipelineSource.gitHub('BeanTins/membership', 'main',{
-          authentication:  oauth
-        }),
+         input: CodePipelineSource.gitHub('BeanTins/membership', 'main'),
          
          // Install dependencies, build and run cdk synth
          commands: [
