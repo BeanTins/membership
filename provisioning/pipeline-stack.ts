@@ -1,5 +1,6 @@
 import { Construct, SecretValue, Stack, StackProps } from '@aws-cdk/core'
-import { CodePipeline, CodePipelineSource, CodeBuildStep, codebuild } from "@aws-cdk/pipelines"
+import { CodePipeline, CodePipelineSource, CodeBuildStep } from "@aws-cdk/pipelines"
+import * as codebuild from "@aws-cdk/aws-codebuild"
 import * as ssm from '@aws-cdk/aws-ssm'
 
 /**
@@ -17,7 +18,7 @@ export class PipelineStack extends Stack {
        synth: new CodeBuildStep("Synth", {
          input: CodePipelineSource.gitHub("BeanTins/membership", "main"),
          buildEnvironment: {
-          buildImage: codebuild.STANDARD_5_0
+          buildImage: codebuild.LinuxBuildImage.STANDARD_5_0
         },
   
          // Install dependencies, build and run cdk synth
