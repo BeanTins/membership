@@ -1,7 +1,6 @@
 import { Construct, SecretValue, Stack, StackProps } from '@aws-cdk/core'
 import { CodePipeline, CodePipelineSource, CodeBuildStep } from "@aws-cdk/pipelines"
 import * as codebuild from "@aws-cdk/aws-codebuild"
-import * as ssm from '@aws-cdk/aws-ssm'
 
 /**
  * The stack that defines the application pipeline
@@ -21,9 +20,9 @@ export class PipelineStack extends Stack {
           buildImage: codebuild.LinuxBuildImage.STANDARD_5_0
         },
   
+        installCommands: ["npm ci"],
          // Install dependencies, build and run cdk synth
          commands: [
-           "npm ci",
            "npm run build",
            "npx cdk synth"
          ],
