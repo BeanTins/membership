@@ -1,5 +1,5 @@
 import { Construct, SecretValue, Stack, StackProps } from '@aws-cdk/core'
-import { CodePipeline, CodePipelineSource, ShellStep } from "@aws-cdk/pipelines"
+import { CodePipeline, CodePipelineSource, CodeBuildStep, codebuild } from "@aws-cdk/pipelines"
 import * as ssm from '@aws-cdk/aws-ssm'
 
 /**
@@ -14,15 +14,17 @@ export class PipelineStack extends Stack {
       pipelineName: "MembershipPipeline",
 
        // How it will be built and synthesized
-       synth: new ShellStep("Synth", {
+       synth: new CodeBuildStep("Synth", {
          input: CodePipelineSource.gitHub("BeanTins/membership", "main"),
-         
+         buildEnvironment: {
+          buildImage: codebuild.UBUNTU_14_04_NODEJS_8_11_0
+        },
+  
          // Install dependencies, build and run cdk synth
          commands: [
-           "npm install",
-           "echo HELLO"
-          //  "npm run test",
-          //  "npx cdk synth"
+           "npm ci",
+           "npm run build",
+           "npx cdk synth"
          ],
        }),
     });
