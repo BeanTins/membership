@@ -8,18 +8,31 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "test:component": "jest --projects jest.component.config.ts",
+    "test:unit": "jest --projects jest.unit.config.ts",
+    "deploy": "npx cdk deploy --outputs-file awsDeploy.json"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.10",
+    "@aws-cdk/assertions": "^1.134.0",
+    "@aws-cdk/aws-apigateway": "^1.134.0",
+    "@aws-cdk/aws-lambda-nodejs": "^1.134.0",
+    "@types/jest": "^26.0.24",
     "@types/node": "10.17.27",
-    "jest": "^26.4.2",
-    "ts-jest": "^26.2.0",
     "aws-cdk": "2.0.0",
+    "esbuild": "^0.14.1",
+    "fs": "^0.0.1-security",
+    "got": "^11.8.3",
+    "jest": "^26.4.2",
+    "jest-cucumber": "^3.0.1",
+    "ts-jest": "^26.2.0",
     "ts-node": "^9.0.0",
-    "typescript": "~3.9.7"
+    "typescript": "~3.9.7",
+    "winston": "^3.3.3"
   },
   "dependencies": {
+    "@aws-cdk/pipelines": "^1.134.0",
+    "@types/aws-lambda": "^8.10.85",
     "aws-cdk-lib": "2.0.0",
     "constructs": "^10.0.0",
     "source-map-support": "^0.5.16"

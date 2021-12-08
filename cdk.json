@@ -1,5 +1,5 @@
 {
-  "app": "npx ts-node --prefer-ts-exts bin/membership.ts",
+  "app": "npx ts-node --prefer-ts-exts provisioning/membership.ts",
   "watch": {
     "include": [
       "**"
