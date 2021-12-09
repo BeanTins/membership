@@ -43,6 +43,9 @@ export class PipelineStack extends Stack {
        }),
     });
 
+    jestReportGroup.grantWrite(pipeline.synthProject)
+
+
     // This is where we add the application stages
     // ...
   }
