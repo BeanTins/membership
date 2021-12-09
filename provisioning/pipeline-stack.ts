@@ -1,6 +1,6 @@
 import { Construct, SecretValue, Stack, StackProps } from '@aws-cdk/core'
 import { CodePipeline, CodePipelineSource, CodeBuildStep } from "@aws-cdk/pipelines"
-import * as codebuild from "@aws-cdk/aws-codebuild"
+import { ReportGroup, LinuxBuildImage, BuildSpec} from "@aws-cdk/aws-codebuild"
 
 /**
  * The stack that defines the application pipeline
@@ -8,6 +8,8 @@ import * as codebuild from "@aws-cdk/aws-codebuild"
 export class PipelineStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
+
+    const jestReportGroup = new ReportGroup(this, 'JestReportGroup', {})
 
     const pipeline = new CodePipeline(this, "Pipeline", {
       // The pipeline name
@@ -17,8 +19,19 @@ export class PipelineStack extends Stack {
        synth: new CodeBuildStep("Synth", {
          input: CodePipelineSource.gitHub("BeanTins/membership", "main"),
          buildEnvironment: {
-          buildImage: codebuild.LinuxBuildImage.STANDARD_5_0
+          buildImage: LinuxBuildImage.STANDARD_5_0
         },
+        partialBuildSpec: BuildSpec.fromObject({
+          version: '0.2',
+          // Make sure your jest config outputs to locations that match what's here
+          reports: {
+            [jestReportGroup.reportGroupArn]: {
+              files: ['unit-test-results.xml'],
+              'file-format': 'JUNITXML',
+              'base-directory': 'reports/unit-test'
+            }
+          }
+        }),
   
         // Install dependencies, build and run cdk synth
          commands: [

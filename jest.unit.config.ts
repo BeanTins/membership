@@ -8,6 +8,13 @@ name: "unit",
 displayName: "Unit Tests",
 preset: "ts-jest",
 testMatch: ["**/unit-tests/*tests.ts"],
+reporters: [
+    'default',
+    [ 'jest-junit', {
+      outputDirectory: "./reports/unit-test",
+      outputName: "unit-test-results.xml",
+    } ]
+  ]
 };
 export default config;
 

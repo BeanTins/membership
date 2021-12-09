@@ -25,6 +25,7 @@
     "got": "^11.8.3",
     "jest": "^26.4.2",
     "jest-cucumber": "^3.0.1",
+    "jest-junit": "^13.0.0",
     "ts-jest": "^26.2.0",
     "ts-node": "^9.0.0",
     "winston": "^3.3.3"
