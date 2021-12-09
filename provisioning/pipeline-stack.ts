@@ -24,6 +24,7 @@ export class PipelineStack extends Stack {
          commands: [
            "npm ci",
            "npm run build",
+           "npm run test:unit",
            "npx cdk synth"
          ],
        }),
