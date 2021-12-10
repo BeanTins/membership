@@ -23,7 +23,7 @@ export class PipelineStack extends Stack {
             [jestReportGroup.reportGroupArn]: {
               files: ['test-results.xml'],
               'file-format': 'JUNITXML',
-              'base-directory': 'reports/unit-test'
+              'base-directory': 'reports/unit-tests'
             }
           }
         }),
@@ -49,7 +49,7 @@ export class PipelineStack extends Stack {
             [jestReportGroup.reportGroupArn]: {
               files: ["test-results.xml","tests.log"],
               "file-format": "JUNITXML",
-              "base-directory": "reports/component-test"
+              "base-directory": "reports/component-tests"
             }
           }
         }),

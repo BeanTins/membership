@@ -11,7 +11,7 @@ testMatch: ["**/unit-tests/*tests.ts"],
 reporters: [
     'default',
     [ 'jest-junit', {
-      outputDirectory: "./reports/unit-test",
+      outputDirectory: "./reports/unit-tests",
       outputName: "test-results.xml",
     } ]
   ]
