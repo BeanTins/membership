@@ -21,7 +21,7 @@ export class PipelineStack extends Stack {
           version: '0.2',
           reports: {
             [jestReportGroup.reportGroupArn]: {
-              files: ['unit-test-results.xml'],
+              files: ['test-results.xml'],
               'file-format': 'JUNITXML',
               'base-directory': 'reports/unit-test'
             }
@@ -42,7 +42,18 @@ export class PipelineStack extends Stack {
     })
 
     pipeline.addStage(testApp,
-      { post: [new ShellStep("Run component tests", {
+      { post: [new CodeBuildStep("RunComponentTests", {
+        partialBuildSpec: BuildSpec.fromObject({
+          version: '0.2',
+          reports: {
+            [jestReportGroup.reportGroupArn]: {
+              files: ["test-results.xml","tests.log"],
+              "file-format": "JUNITXML",
+              "base-directory": "reports/component-test"
+            }
+          }
+        }),
+
         commands: ["npm run test:component"]})]})
 
     pipeline.buildPipeline()

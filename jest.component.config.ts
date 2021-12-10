@@ -10,6 +10,13 @@ testMatch: [
 transform: {
 "^.+\\.(ts|tsx)$": "ts-jest"
 },
-  };
+reporters: [
+  "default",
+  [ "jest-junit", {
+    outputDirectory: "./reports/component-tests",
+    outputName: "test-results.xml",
+  } ]
+]
+}
 export default config;
 

@@ -12,9 +12,9 @@ reporters: [
     'default',
     [ 'jest-junit', {
       outputDirectory: "./reports/unit-test",
-      outputName: "unit-test-results.xml",
+      outputName: "test-results.xml",
     } ]
   ]
-};
+}
 export default config;
 
