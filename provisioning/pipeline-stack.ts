@@ -1,5 +1,5 @@
 import { Construct, Stack, StackProps, Stage, StageProps } from '@aws-cdk/core'
-import { CodePipeline, CodePipelineSource, CodeBuildStep } from "@aws-cdk/pipelines"
+import { CodePipeline, CodePipelineSource, CodeBuildStep, ShellStep } from "@aws-cdk/pipelines"
 import { ReportGroup, LinuxBuildImage, BuildSpec} from "@aws-cdk/aws-codebuild"
 import { MembershipStage } from "./membership-stage"
 
@@ -10,10 +10,8 @@ export class PipelineStack extends Stack {
     const jestReportGroup = new ReportGroup(this, 'JestReportGroup', {})
 
     const pipeline = new CodePipeline(this, "Pipeline", {
-      // The pipeline name
       pipelineName: "MembershipPipeline",
 
-       // How it will be built and synthesized
        synth: new CodeBuildStep("Synth", {
          input: CodePipelineSource.gitHub("BeanTins/membership", "main"),
          buildEnvironment: {
@@ -43,8 +41,9 @@ export class PipelineStack extends Stack {
       env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
     })
 
-    pipeline.addStage(testApp)
-
+    pipeline.addStage(testApp,
+      { post: [new ShellStep("Run component tests", {
+        commands: ["npm run test:component"]})]})
 
     pipeline.buildPipeline()
 
