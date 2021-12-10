@@ -1,6 +1,7 @@
 import { Construct, SecretValue, Stack, StackProps } from '@aws-cdk/core'
-import { CodePipeline, CodePipelineSource, CodeBuildStep } from "@aws-cdk/pipelines"
+import { CodePipeline, CodePipelineSource, CodeBuildStep, ShellStep } from "@aws-cdk/pipelines"
 import { ReportGroup, LinuxBuildImage, BuildSpec} from "@aws-cdk/aws-codebuild"
+import { MembershipStage } from "./membership-stage"
 
 /**
  * The stack that defines the application pipeline
@@ -43,8 +44,15 @@ export class PipelineStack extends Stack {
        }),
     });
 
-    // This is where we add the application stages
-    // ...
+    const testApp = new MembershipStage(this, 'ComponentTest', {
+      env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+    })
+
+    pipeline.addStage(testApp, 
+      {post: [new ShellStep("Run component tests", {
+        commands: ["npm run test:component"]})]})
+
+
     pipeline.buildPipeline()
 
     jestReportGroup.grantWrite(pipeline.synthProject)

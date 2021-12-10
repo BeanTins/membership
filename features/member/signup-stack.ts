@@ -8,6 +8,7 @@ import * as path from "path"
 export class SignupStack extends Stack {
   private restApi: RestApi
   private lambda: Function
+  public readonly endpoint: CfnOutput
     
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
@@ -28,7 +29,7 @@ export class SignupStack extends Stack {
 
     memberSignup.addMethod("POST", new LambdaIntegration(this.lambda, {}))
 
-    new CfnOutput(this, "endpoint", {value: this.restApi.url + "member/signup"})
+    this.endpoint = new CfnOutput(this, "endpoint", {value: this.restApi.url + "member/signup"})
   }
 } 
 
