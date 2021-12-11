@@ -37,7 +37,7 @@ export class PipelineStack extends Stack {
     
     const pipeline = new CodePipeline(this, "Pipeline", {
        pipelineName: "MembershipPipeline",
-       synth: sourceCode,
+       synth: synthStep,
     });
 
     const testApp = new MembershipStage(this, 'ComponentTest',{
@@ -64,7 +64,6 @@ export class PipelineStack extends Stack {
           "npm run test:component"]})]})
 
     pipeline.buildPipeline()
-
     jestReportGroup.grantWrite(pipeline.synthProject)
 
   }
