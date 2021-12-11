@@ -43,6 +43,7 @@ export class PipelineStack extends Stack {
 
     pipeline.addStage(testApp,
       { post: [new CodeBuildStep("RunComponentTests", {
+        input: this._synthesizeTemplate,
         partialBuildSpec: BuildSpec.fromObject({
           version: '0.2',
           reports: {
