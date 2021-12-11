@@ -18,16 +18,19 @@ export async function signupMember(name: string | null, email: string | null)
     try{
         logger.verbose(path.join(__dirname, "awsDeploy.json"))
 
-        const deployOutputs = JSON.parse(readFileSync(path.join(__dirname, "../../../awsDeploy.json"), "utf8"))
+        //const deployOutputs = JSON.parse(readFileSync(path.join(__dirname, "../../../awsDeploy.json"), "utf8"))
 
-        const url = deployOutputs.MemberSignupStack.endpoint
+        const url = process.env.memberSignupEndpoint
 
-        logger.verbose("Signup member at url - " + url)
+        if (url != null)
+        {
+            logger.verbose("Signup member at url - " + url)
 
-        responseBody = await got.post(url, {json: requestBody})
+            responseBody = await got.post(url, {json: requestBody})
 
-        logger.verbose("Signup member response - " + responseBody.statusCode)
-        logger.verbose("Signup member response - " + responseBody.body)
+            logger.verbose("Signup member response - " + responseBody.statusCode)
+            logger.verbose("Signup member response - " + responseBody.body)
+        }
     }
     catch(error)
     {

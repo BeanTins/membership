@@ -1,5 +1,5 @@
-import { Construct, Stack, StackProps, Stage, StageProps } from '@aws-cdk/core'
-import { CodePipeline, CodePipelineSource, CodeBuildStep, ShellStep } from "@aws-cdk/pipelines"
+import { Construct, Stack, StackProps } from '@aws-cdk/core'
+import { CodePipeline, CodePipelineSource, CodeBuildStep, IFileSetProducer } from "@aws-cdk/pipelines"
 import { ReportGroup, LinuxBuildImage, BuildSpec} from "@aws-cdk/aws-codebuild"
 import { MembershipStage } from "./membership-stage"
 
@@ -9,32 +9,35 @@ export class PipelineStack extends Stack {
 
     const jestReportGroup = new ReportGroup(this, 'JestReportGroup', {})
 
-    const pipeline = new CodePipeline(this, "Pipeline", {
-      pipelineName: "MembershipPipeline",
+    const sourceCode = CodePipelineSource.gitHub("BeanTins/membership", "main")
 
-       synth: new CodeBuildStep("Synth", {
-         input: CodePipelineSource.gitHub("BeanTins/membership", "main"),
-         buildEnvironment: {
-          buildImage: LinuxBuildImage.STANDARD_5_0
-        },
-        partialBuildSpec: BuildSpec.fromObject({
-          version: '0.2',
-          reports: {
-            [jestReportGroup.reportGroupArn]: {
-              files: ['test-results.xml'],
-              'file-format': 'JUNITXML',
-              'base-directory': 'reports/unit-tests'
-            }
-          }
-        }),
-  
-         commands: [
-           "npm ci",
-           "npm run build",
-           "npm run test:unit",
-           "npx cdk synth"
-         ],
-       }),
+    const synthStep = new CodeBuildStep("Synth", {
+      input: sourceCode,
+      buildEnvironment: {
+       buildImage: LinuxBuildImage.STANDARD_5_0
+     },
+     partialBuildSpec: BuildSpec.fromObject({
+       version: '0.2',
+       reports: {
+         [jestReportGroup.reportGroupArn]: {
+           files: ['test-results.xml'],
+           'file-format': 'JUNITXML',
+           'base-directory': 'reports/unit-tests'
+         }
+       }
+     }),
+
+      commands: [
+        "npm ci",
+        "npm run build",
+        "npm run test:unit",
+        "npx cdk synth"
+      ],
+    })
+    
+    const pipeline = new CodePipeline(this, "Pipeline", {
+       pipelineName: "MembershipPipeline",
+       synth: sourceCode,
     });
 
     const testApp = new MembershipStage(this, 'ComponentTest',{
@@ -43,7 +46,8 @@ export class PipelineStack extends Stack {
 
     pipeline.addStage(testApp,
       { post: [new CodeBuildStep("RunComponentTests", {
-        input: this._synthesizeTemplate,
+        input: sourceCode,
+        envFromCfnOutputs: {member_signup_endpoint: testApp.signupEndpoint},
         partialBuildSpec: BuildSpec.fromObject({
           version: '0.2',
           reports: {
@@ -55,7 +59,9 @@ export class PipelineStack extends Stack {
           }
         }),
 
-        commands: ["npm run test:component"]})]})
+        commands: ["export memberSignupEndpoint=$member-signup-endpoint",
+          "npm ci",
+          "npm run test:component"]})]})
 
     pipeline.buildPipeline()
 
