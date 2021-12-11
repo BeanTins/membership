@@ -7,7 +7,7 @@ export class PipelineStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    const jestReportGroup = new ReportGroup(this, 'JestReportGroup', {})
+    const jestUnitTestReportGroup = new ReportGroup(this, 'JestUnitReportGroup', {})
 
     const sourceCode = CodePipelineSource.gitHub("BeanTins/membership", "main")
 
@@ -19,7 +19,7 @@ export class PipelineStack extends Stack {
      partialBuildSpec: BuildSpec.fromObject({
        version: '0.2',
        reports: {
-         [jestReportGroup.reportGroupArn]: {
+         [jestUnitTestReportGroup.reportGroupArn]: {
            files: ['test-results.xml'],
            'file-format': 'JUNITXML',
            'base-directory': 'reports/unit-tests'
@@ -44,6 +44,8 @@ export class PipelineStack extends Stack {
       env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
     })
 
+    const jestComponentTestReportGroup = new ReportGroup(this, 'JestComponentReportGroup', {})
+
     pipeline.addStage(testApp,
       { post: [new CodeBuildStep("RunComponentTests", {
         input: sourceCode,
@@ -51,7 +53,7 @@ export class PipelineStack extends Stack {
         partialBuildSpec: BuildSpec.fromObject({
           version: '0.2',
           reports: {
-            [jestReportGroup.reportGroupArn]: {
+            [jestComponentTestReportGroup.reportGroupArn]: {
               files: ["test-results.xml","tests.log"],
               "file-format": "JUNITXML",
               "base-directory": "reports/component-tests"
@@ -64,8 +66,8 @@ export class PipelineStack extends Stack {
           "npm run test:component"]})]})
 
     pipeline.buildPipeline()
-    jestReportGroup.grantWrite(pipeline.synthProject)
-
+    jestUnitTestReportGroup.grantWrite(pipeline.synthProject)
+    jestComponentTestReportGroup.grantWrite(pipeline.synthProject)
   }
 }
 
