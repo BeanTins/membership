@@ -1,5 +1,5 @@
 import { Construct, Stack, StackProps } from '@aws-cdk/core'
-import { CodePipeline, CodePipelineSource, CodeBuildStep, IFileSetProducer } from "@aws-cdk/pipelines"
+import { CodePipeline, CodePipelineSource, CodeBuildStep, ManualApprovalStep } from "@aws-cdk/pipelines"
 import { ReportGroup, LinuxBuildImage, BuildSpec} from "@aws-cdk/aws-codebuild"
 import { MembershipStage } from "./membership-stage"
 import { Bucket } from "@aws-cdk/aws-s3"
@@ -71,8 +71,19 @@ export class PipelineStack extends Stack {
     pipeline.addStage(testApp,
       { post: [testStep] } )
 
+    const prodApp = new MembershipStage(this, 'Production',{
+      env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+    })
+  
+    pipeline.addStage(prodApp,{
+      pre: [
+        new ManualApprovalStep('PromoteToProduction'),
+      ]
+    })
+
     pipeline.buildPipeline()
-    jestUnitTestReportGroup.grantWrite(pipeline.synthProject)
+
+    jestUnitTestReportGroup.grantWrite(synthStep.grantPrincipal)
     jestComponentTestReportGroup.grantWrite(testStep.grantPrincipal)
   }
 }
