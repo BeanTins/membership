@@ -63,7 +63,7 @@ export class PipelineStack extends Stack {
         },
         
       }),
-      commands: ["export memberSignupEndpoint=$member-signup-endpoint",
+      commands: ["export memberSignupEndpoint=$member_signup_endpoint",
       "npm ci",
       "npm run test:component"]
     })
