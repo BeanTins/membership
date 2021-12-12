@@ -46,28 +46,30 @@ export class PipelineStack extends Stack {
 
     const jestComponentTestReportGroup = new ReportGroup(this, 'JestComponentReportGroup', {})
 
-    pipeline.addStage(testApp,
-      { post: [new CodeBuildStep("RunComponentTests", {
-        input: sourceCode,
-        envFromCfnOutputs: {member_signup_endpoint: testApp.signupEndpoint},
-        partialBuildSpec: BuildSpec.fromObject({
-          version: '0.2',
-          reports: {
-            [jestComponentTestReportGroup.reportGroupArn]: {
-              files: ["test-results.xml","tests.log"],
-              "file-format": "JUNITXML",
-              "base-directory": "reports/component-tests"
-            }
+    const testStep = new CodeBuildStep("RunComponentTests", {
+      input: sourceCode,
+      envFromCfnOutputs: {member_signup_endpoint: testApp.signupEndpoint},
+      partialBuildSpec: BuildSpec.fromObject({
+        version: '0.2',
+        reports: {
+          [jestComponentTestReportGroup.reportGroupArn]: {
+            files: ["test-results.xml","tests.log"],
+            "file-format": "JUNITXML",
+            "base-directory": "reports/component-tests"
           }
-        }),
-
-        commands: ["export memberSignupEndpoint=$member-signup-endpoint",
-          "npm ci",
-          "npm run test:component"]})]})
+        }
+      }),
+      commands: ["export memberSignupEndpoint=$member-signup-endpoint",
+      "npm ci",
+      "npm run test:component"]
+    })
+    
+    pipeline.addStage(testApp,
+      { post: [testStep] } )
 
     pipeline.buildPipeline()
     jestUnitTestReportGroup.grantWrite(pipeline.synthProject)
-    jestComponentTestReportGroup.grantWrite(pipeline.synthProject)
+    jestComponentTestReportGroup.grantWrite(testStep.grantPrincipal)
   }
 }
 
