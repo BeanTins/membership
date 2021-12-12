@@ -2,6 +2,7 @@ import { Construct, Stack, StackProps } from '@aws-cdk/core'
 import { CodePipeline, CodePipelineSource, CodeBuildStep, IFileSetProducer } from "@aws-cdk/pipelines"
 import { ReportGroup, LinuxBuildImage, BuildSpec} from "@aws-cdk/aws-codebuild"
 import { MembershipStage } from "./membership-stage"
+import { Bucket } from "@aws-cdk/aws-s3"
 
 export class PipelineStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -44,7 +45,9 @@ export class PipelineStack extends Stack {
       env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
     })
 
-    const jestComponentTestReportGroup = new ReportGroup(this, 'JestComponentReportGroup', {})
+    const componentReportExports = new Bucket(this, "ComponentTestReportExports", {})
+
+    const jestComponentTestReportGroup = new ReportGroup(this, 'JestComponentReportGroup', {exportBucket: componentReportExports})
 
     const testStep = new CodeBuildStep("RunComponentTests", {
       input: sourceCode,
@@ -57,7 +60,8 @@ export class PipelineStack extends Stack {
             "file-format": "JUNITXML",
             "base-directory": "reports/component-tests"
           }
-        }
+        },
+        
       }),
       commands: ["export memberSignupEndpoint=$member-signup-endpoint",
       "npm ci",
