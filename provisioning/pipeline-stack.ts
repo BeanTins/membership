@@ -6,7 +6,7 @@ import { Bucket } from "@aws-cdk/aws-s3"
 
 export class PipelineStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
-    super(scope, id, props);
+    super(scope, id, props)
 
     const jestUnitTestReportGroup = new ReportGroup(this, 'JestUnitReportGroup', {})
 
@@ -39,7 +39,7 @@ export class PipelineStack extends Stack {
     const pipeline = new CodePipeline(this, "Pipeline", {
        pipelineName: "MembershipPipeline",
        synth: synthStep,
-    });
+    })
 
     const testApp = new MembershipStage(this, 'ComponentTest',{
       env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },

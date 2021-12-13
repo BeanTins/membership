@@ -11,7 +11,8 @@
     "cdk": "cdk",
     "test:component": "jest --projects jest.component.config.ts",
     "test:unit": "jest --projects jest.unit.config.ts",
-    "deploy": "npx cdk deploy --outputs-file awsDeploy.json"
+    "deploy:pipeline": "npx cdk deploy",
+    "deploy:dev": "npx cdk deploy MembershipDevStage/* --outputs-file awsDeploy.json --app \"npx ts-node --prefer-ts-exts provisioning/membership-dev.ts\""
   },
   "devDependencies": {
     "@aws-cdk/assertions": "^1.134.0",
