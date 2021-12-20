@@ -1,11 +1,29 @@
 #!/usr/bin/env node
 import { App } from '@aws-cdk/core'
-import { PipelineStack } from './pipeline-stack'
+import { SCM } from './pipeline-builder/pipeline-stack'
+import { PipelineBuilder } from "./pipeline-builder/pipeline-builder"
+import { MembershipFactory} from "./membership-factory"
 
-const app = new App();
+const membershipFactory = new MembershipFactory()
 
-new PipelineStack(app, 'PipelineStack', {
-  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
-})
+const app = new App()
 
-app.synth();
+const pipeline = new PipelineBuilder(app, membershipFactory)
+
+pipeline.withName("MembershipPipeline")
+
+pipeline.withCommitStage(
+  {
+    extractingSourceFrom: { provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main" },
+    executingCommands: []
+  })
+pipeline.withAcceptanceStage(
+  {
+    extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
+    executingCommands: ["npm run test:component"],
+  }
+)
+
+pipeline.build()
+
+app.synth()
