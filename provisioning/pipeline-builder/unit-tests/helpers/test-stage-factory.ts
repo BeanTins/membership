@@ -1,5 +1,5 @@
-import { Stage, Construct, Stack } from "@aws-cdk/core"
-import { StageFactory } from "../../stage-factory"
+import { Stage, Construct, Stack, CfnOutput } from "@aws-cdk/core"
+import { StageFactory, DeploymentStage } from "../../stage-factory"
 import { Bucket } from "@aws-cdk/aws-s3"
 
 export class TestStageFactory implements StageFactory {
@@ -10,7 +10,7 @@ export class TestStageFactory implements StageFactory {
     return this._createdStacks
   }
 
-  public create(scope: Construct, name: string): Stage {
+  public create(scope: Construct, name: string): DeploymentStage {
     this.createdStacks.push(name)
 
     return new TestStage(scope, name)
@@ -18,18 +18,25 @@ export class TestStageFactory implements StageFactory {
 }
 
 class TestStage extends Stage {
-
+  private testEndpoint: CfnOutput
+  get endpoints(): Record<string, CfnOutput> {return {testFunction: this.testEndpoint} }
   constructor(scope: Construct, id: string) {
     super(scope, id)
-    new TestStack(this, "TestStack")
+    const testStack = new TestStack(this, "TestStack")
+    this.testEndpoint = testStack.bucketName
   }
 }
 
 class TestStack extends Stack {
-    
+  private _bucketName: CfnOutput
+  get bucketName(): CfnOutput {return this._bucketName}
   constructor(scope: Construct, id: string) {
     super(scope, id)
-    new Bucket(this, "TestBucket", {})
+    const bucket = new Bucket(this, "TestBucket", {})
+    
+    this._bucketName = new CfnOutput(this, 'bucketName', {
+      value: bucket.bucketName
+    })
   }
 }
 

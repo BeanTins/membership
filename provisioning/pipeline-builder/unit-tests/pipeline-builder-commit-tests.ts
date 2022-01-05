@@ -65,22 +65,59 @@ test("Pipeline with unit test reports", () => {
     }
   )
 
-  let stack: PipelineStack = pipelineBuilder.build()
-
-  const template = Template.fromStack(stack)
+  const template = Template.fromStack(pipelineBuilder.build())
 
   const reportingString = new Capture()
   
   template.hasResourceProperties("AWS::CodeBuild::Project", {
-    Source:
-       Match.objectLike(
-         {BuildSpec: 
-           Match.objectLike(
-                {"Fn::Join": reportingString})})}) 
+    Source: Match.objectLike({
+      BuildSpec: Match.objectLike({
+        "Fn::Join": reportingString
+      })
+    })
+  }) 
 
   let buildSpecText = reportingString.asArray().toString()
   expect(buildSpecText).toEqual(expect.stringMatching(/files.+test-results.xml/sm))
   expect(buildSpecText).toEqual(expect.stringMatching(/base-directory.+reports[/]unit-tests/sm))
+})
+
+test("Pipeline with report creation permissions", () => {
+  pipelineBuilder.withName("MembershipPipeline")
+  pipelineBuilder.withCommitStage(
+    {
+      extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
+      executingCommands: ["npm ci"],
+      reporting: {fromDirectory: "reports/unit-tests", withFiles: ["test-results.xml"]}
+    }
+  )
+
+  const template = Template.fromStack(pipelineBuilder.build())
+
+  const reportGroup = template.findResources("AWS::CodeBuild::ReportGroup")
+
+  expect(reportGroup).toBeDefined()
+
+  const reportGroupName = Object.keys(reportGroup)[0]
+
+  expect(reportGroupName).toBeDefined()
+  
+  template.hasResourceProperties("AWS::IAM::Policy", {
+    PolicyDocument: Match.objectLike({
+      Statement: Match.arrayWith([
+        Match.objectLike({
+          "Action": [
+            "codebuild:CreateReport", 
+            "codebuild:UpdateReport",
+            "codebuild:BatchPutTestCases"],
+          "Resource":  {
+            "Fn::GetAtt": Match.arrayWith([
+              reportGroupName])
+            }
+          })
+        ])
+      })
+    })
 })
 
 function pipelineWithNameAndCommitStagePopulated() {

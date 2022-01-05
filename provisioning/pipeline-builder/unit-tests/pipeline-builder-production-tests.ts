@@ -1,11 +1,9 @@
-import { SCM, ExportType } from "../pipeline-stack"
+import { SCM } from "../pipeline-stack"
 import { PipelineBuilder } from "../pipeline-builder"
 import { App } from "@aws-cdk/core"
-import { Template, Match, Capture } from "@aws-cdk/assertions"
 import { TestStageFactory } from "./helpers/test-stage-factory"
 import { expectAndFindPipelineStage, 
-  expectActionsToContainPartialMatch, 
-  expectCommandsToBe } from "./helpers/pipeline-expect"
+  expectActionsToContainPartialMatch} from "./helpers/pipeline-expect"
 
 let stageFactory: TestStageFactory
 let pipelineBuilder: PipelineBuilder

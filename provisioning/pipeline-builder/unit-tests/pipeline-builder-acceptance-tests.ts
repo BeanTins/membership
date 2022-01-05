@@ -23,7 +23,47 @@ beforeEach(() => {
     })
 })
 
+test("Pipeline with own source from github", () => {
+  pipelineBuilder.withAcceptanceStage(
+    {extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership-e2e-tests", branch: "main"},
+     executingCommands: []})
+
+  const template = Template.fromStack(pipelineBuilder.build())
+
+  template.hasResourceProperties("AWS::CodePipeline::Pipeline", {
+    Stages: Match.arrayWith([
+      Match.objectLike({
+        "Name": "Source", 
+        "Actions": Match.arrayWith([
+          Match.objectLike({
+            Configuration: Match.objectLike({
+              Owner: "BeanTins",
+              Repo: "membership-e2e-tests",
+              Branch: "main"}),
+            ActionTypeId: Match.objectLike({Provider: "GitHub"})
+           })
+         ])
+       })
+    ])
+  })
+})
+
+test("Pipeline with same source as commit", () => {
+  pipelineBuilder.withAcceptanceStage(
+    {extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
+     executingCommands: []})
+
+  const stack = pipelineBuilder.build()
+
+  const stageActions = expectAndFindPipelineStage(stack, "Source")
+
+  expectActionsToContainPartialMatch(stageActions, "ActionTypeId", {Provider: "GitHub"})
+  expectActionsToContainPartialMatch(stageActions, "Configuration", 
+                                     {Owner: "BeanTins", Repo: "membership", Branch: "main"})
+})
+
 test("Pipeline with source from github", () => {
+  pipelineBuilder.withName("MembershipPipeline")
   pipelineBuilder.withAcceptanceStage(
     {extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
      executingCommands: []})
@@ -79,9 +119,8 @@ test("Pipeline with acceptance stage component test reporting", () => {
       reporting: {fromDirectory: "reports/component-tests", withFiles: ["test-results.xml"]}
     }
   )
-  const stack = pipelineBuilder.build()
 
-  const template = Template.fromStack(stack)
+  const template = Template.fromStack(pipelineBuilder.build())
 
   const reportingString = new Capture()
 
@@ -106,9 +145,8 @@ test("Pipeline with acceptance stage component test exporting", () => {
       {fromDirectory: "reports/component-tests", withFiles: ["test-results.xml"], exportingTo: ExportType.S3}
     }
   )
-  const stack = pipelineBuilder.build()
 
-  const template = Template.fromStack(stack)
+  const template = Template.fromStack(pipelineBuilder.build())
 
   template.hasResourceProperties("AWS::CodeBuild::ReportGroup", {
     ExportConfig:
@@ -117,6 +155,85 @@ test("Pipeline with acceptance stage component test exporting", () => {
   )}) 
 
 })
+
+test("Pipeline with report creation permissions", () => {
+  pipelineBuilder.withName("MembershipPipeline")
+  pipelineBuilder.withAcceptanceStage(
+    {
+      extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
+      executingCommands: ["npm ci"],
+      reporting: {fromDirectory: "reports/unit-tests", withFiles: ["test-results.xml"]}
+    }
+  )
+
+  const template = Template.fromStack(pipelineBuilder.build())
+
+  const reportGroup = template.findResources("AWS::CodeBuild::ReportGroup")
+
+  expect(reportGroup).toBeDefined()
+
+  const reportGroupName = Object.keys(reportGroup)[0]
+
+  expect(reportGroupName).toBeDefined()
+  
+  template.hasResourceProperties("AWS::IAM::Policy", {
+    PolicyDocument: Match.objectLike({
+      Statement: Match.arrayWith([
+        Match.objectLike({
+          "Action": ["codebuild:CreateReport", "codebuild:UpdateReport","codebuild:BatchPutTestCases"],
+          "Resource": {
+            "Fn::GetAtt": Match.arrayWith([reportGroupName])
+          }
+        })
+      ])
+    })
+  })
+})
+
+test("Pipeline with endpoints as environment variables", () => {
+  pipelineBuilder.withName("MembershipPipeline")
+  pipelineBuilder.withAcceptanceStage(
+    {
+      extractingSourceFrom: { provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main" },
+      executingCommands: [],
+      exposingEndpointsAsEnvVars: true
+    })
+
+  const template = Template.fromStack(pipelineBuilder.build())
+
+  template.hasResourceProperties("AWS::CodePipeline::Pipeline", {
+    Stages: Match.arrayWith([
+      Match.objectLike({
+        "Name": "AcceptanceTest", 
+        "Actions": Match.arrayWith([
+          Match.objectLike({
+            Configuration: Match.objectLike({
+              EnvironmentVariables: Match.serializedJson(Match.arrayWith([
+                Match.objectLike({
+                  name: "testFunction"
+                })
+              ]))
+            })
+          })
+        ])
+      })
+    ])
+  })
+  
+  template.hasResourceProperties("AWS::CodeBuild::Project", {
+    Source: Match.objectLike({
+      BuildSpec: Match.serializedJson(Match.objectLike({
+        phases: Match.objectLike({
+          build: Match.objectLike({ 
+            commands: ["export testFunction=$testFunction"] 
+          })
+        })
+      }))
+    })
+  }) 
+})
+
+
 
 
 

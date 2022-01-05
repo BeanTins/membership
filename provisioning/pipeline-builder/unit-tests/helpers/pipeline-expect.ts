@@ -5,18 +5,19 @@ export function expectCommandsToBe(stack: PipelineStack, commands: string[]) {
   const template = Template.fromStack(stack)
 
   template.hasResourceProperties("AWS::CodeBuild::Project",
-    {
-      Source: Match.objectLike(
-        {
-          BuildSpec: Match.serializedJson(
-            Match.objectLike({
-              phases: Match.objectLike({
-                build: Match.objectLike({ commands: commands })
-              })
+  {
+    Source: Match.objectLike({
+      BuildSpec: Match.serializedJson(
+        Match.objectLike({
+          phases: Match.objectLike({
+            build: Match.objectLike({ 
+              commands: commands 
             })
-          )
+          })
         })
+      )
     })
+  })
 }
 
 export function expectAndFindPipelineStage(stack: PipelineStack, stageName: string): any{
