@@ -119,7 +119,11 @@ export class PipelineStack extends Stack {
 
     if(props.exposingEndpointsAsEnvVars){
       buildStepSetup["envFromCfnOutputs"] = deployedInfrastructure.endpoints
-      buildStepSetup["commands"] = this.buildEnvironmentVariableExportCommands(deployedInfrastructure.endpoints)
+
+      let commands = this.buildEnvironmentVariableExportCommands(deployedInfrastructure.endpoints)
+      commands = commands.concat(props.executingCommands)
+
+      buildStepSetup["commands"] = commands
    }
 
     return this.buildBuildStep("AcceptanceTest", buildStepSetup, reportGroup)

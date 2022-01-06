@@ -195,7 +195,7 @@ test("Pipeline with endpoints as environment variables", () => {
   pipelineBuilder.withAcceptanceStage(
     {
       extractingSourceFrom: { provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main" },
-      executingCommands: [],
+      executingCommands: ["npm run test:component"],
       exposingEndpointsAsEnvVars: true
     })
 
@@ -225,7 +225,7 @@ test("Pipeline with endpoints as environment variables", () => {
       BuildSpec: Match.serializedJson(Match.objectLike({
         phases: Match.objectLike({
           build: Match.objectLike({ 
-            commands: ["export testFunction=$testFunction"] 
+            commands: ["export testFunction=$testFunction", "npm run test:component"] 
           })
         })
       }))

@@ -15,13 +15,13 @@ pipeline.withName("MembershipPipeline")
 pipeline.withCommitStage(
   {
     extractingSourceFrom: { provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main" },
-    executingCommands: [],
+    executingCommands: ["npm ci", "npm run build", "npm run test:unit", "npx cdk synth"],
     reporting: {fromDirectory: "reports/unit-tests", withFiles: ["test-results.xml"]}
   })
 pipeline.withAcceptanceStage(
   {
     extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
-    executingCommands: ["npm run test:component"],
+    executingCommands: ["npm ci", "npm run test:component"],
     reporting: {fromDirectory: "reports/component-tests", withFiles: ["test-results.xml"]},
     exposingEndpointsAsEnvVars: true
   }
