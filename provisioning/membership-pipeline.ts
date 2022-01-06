@@ -26,6 +26,11 @@ pipeline.withAcceptanceStage(
     exposingEndpointsAsEnvVars: true
   }
 )
+pipeline.withProductionStage(
+  {
+    manualApproval: true
+  }
+)
 
 pipeline.build()
 
