@@ -6,7 +6,7 @@ export class MembershipStage extends Stage {
   private readonly signupEndpoint: CfnOutput;
   private signup: SignupStack
 
-  get endpoints(): Record<string, CfnOutput> {return {SignupStack: this.signupEndpoint} }
+  get endpoints(): Record<string, CfnOutput> {return {memberSignupEndpoint: this.signupEndpoint} }
 
   constructor(scope: Construct, id: string, props?: StageProps) {
     super(scope, id, props);
