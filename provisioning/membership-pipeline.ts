@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { App } from '@aws-cdk/core'
-import { SCM } from './pipeline-builder/pipeline-stack'
+import { ExportType, SCM } from './pipeline-builder/pipeline-stack'
 import { PipelineBuilder } from "./pipeline-builder/pipeline-builder"
 import { MembershipFactory} from "./membership-factory"
 
@@ -22,7 +22,7 @@ pipeline.withAcceptanceStage(
   {
     extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
     executingCommands: ["npm ci", "npm run test:component"],
-    reporting: {fromDirectory: "reports/component-tests", withFiles: ["test-results.xml"]},
+    reporting: {fromDirectory: "reports/component-tests", withFiles: ["test-results.xml", "tests.log"], exportingTo: ExportType.S3},
     exposingEndpointsAsEnvVars: true
   }
 )
