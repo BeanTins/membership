@@ -2,18 +2,24 @@
 import { APIGatewayEvent, Context, APIGatewayProxyResult } from "aws-lambda"
 
 export const lambdaHandler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => { 
+  var signupController: SignupController = new SignupController()
 
+  return signupController.signup(event.body)
+}
+
+export class SignupController {
+
+  signup(signupDTO: any) {
     var statusCode: number
     var message: string
 
     try {
-        const signupCommand = parseCommand(event.body)
+      const signupCommand = this.parseCommand(signupDTO)
 
-        statusCode = 201
-        message = "member created"
+      statusCode = 201
+      message = "member created"
     } 
     catch (error) {
-        console.log(error)
         if (error instanceof InvalidSignupCommand)
         {
           statusCode = 400
@@ -32,16 +38,9 @@ export const lambdaHandler = async (event: APIGatewayEvent, context: Context): P
         message: message
       })
     }
-}
+  }
 
-class InvalidSignupCommand extends Error {}
-
-export class SignupCommand {
-  name: string
-  email: string
-}
-
-function parseCommand(serialisedObject: string | null): SignupCommand {
+  parseCommand(serialisedObject: string | null): SignupCommand {
     if (serialisedObject == null) {
       throw new InvalidSignupCommand("no command specified for signup")
     }
@@ -56,5 +55,14 @@ function parseCommand(serialisedObject: string | null): SignupCommand {
     }
       
     return command
+  }
+
+}
+
+class InvalidSignupCommand extends Error {}
+
+export class SignupCommand {
+  name: string
+  email: string
 }
 
