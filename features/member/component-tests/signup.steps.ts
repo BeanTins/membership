@@ -9,6 +9,11 @@ let email: string | null
 let responseCode: number
 let responseMessage: string
 
+beforeEach(() => {
+  name = null
+  email = null
+});
+
 export const SignupSteps: StepDefinitions = ({ given, and, when, then }) => {
 
   given("I am not registered", () => {
@@ -28,14 +33,20 @@ export const SignupSteps: StepDefinitions = ({ given, and, when, then }) => {
     let response = await signupMember(name, email)
     if (response != null)
     {
-      logger.verbose("responseCode - " + response.statusCode + ",message - " + response.body)
+      const responseMessageBody = JSON.parse(response.body)
+
+      logger.verbose("responseCode - " + response.statusCode + ",message - " + responseMessageBody.message)
       responseCode = response.statusCode;
-      responseMessage = response.body;
+      responseMessage = responseMessageBody.message;
     }
   })
   
   then(/I receive a (\d+) response code/,  expectedResponseCode => {
     expect(responseCode).toBe(Number(expectedResponseCode));
+  })
+
+  then(/I receive the message "(.+)"/,  expectedResponseMessage => {
+    expect(responseMessage).toBe(expectedResponseMessage);
   })
 }
 

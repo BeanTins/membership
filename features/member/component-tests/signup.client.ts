@@ -30,7 +30,10 @@ export async function signupMember(name: string | null, email: string | null)
 {
     let responseBody: any = {}
     let requestBody: any = {}
-    requestBody.name = name
+
+    if (name) {
+        requestBody.name = name
+    }
 
     if (email) {
         requestBody.email = email
@@ -41,7 +44,9 @@ export async function signupMember(name: string | null, email: string | null)
 
         logger.verbose("member signup url - " + url)
 
-        responseBody = await got.post(url, {json: requestBody})
+        logger.verbose("request body - " + JSON.stringify(requestBody))
+
+        responseBody = await got.post(url, {json: requestBody, throwHttpErrors: false})
 
         logger.verbose("member signup response statusCode:" + 
                         responseBody.statusCode + 
