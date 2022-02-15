@@ -4,7 +4,6 @@ import { MemberTableStack } from "./member-table-stack"
 import { CfnOutput, Construct, StageProps, Stage } from "@aws-cdk/core"
 
 export class MembershipStage extends Stage {
-  private readonly signupEndpoint: CfnOutput;
   private readonly signup: SignupStack
   private readonly memberTable: MemberTableStack
 

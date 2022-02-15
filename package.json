@@ -11,7 +11,7 @@
     "cdk": "cdk",
     "test:component": "jest --projects jest.component.config.ts",
     "test:unit": "jest --projects jest.unit.config.ts",
-    "deploy:pipeline": "npx cdk deploy --app \"npx ts-node --prefer-ts-exts provisioning/membership-pipeline.ts\"",
+    "deploy:pipeline": "npx cdk deploy PipelineStack/*/* --app \"npx ts-node --prefer-ts-exts provisioning/membership-pipeline.ts\"",
     "deploy": "npx cdk deploy MembershipDevStage/* --outputs-file awsDeploy.json",
     "synth": "npx cdk synth"
   },
