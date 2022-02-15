@@ -196,7 +196,7 @@ test("Pipeline with endpoints as environment variables", () => {
     {
       extractingSourceFrom: { provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main" },
       executingCommands: ["npm run test:component"],
-      exposingEndpointsAsEnvVars: true
+      exposingEnvVars: true
     })
 
   const template = Template.fromStack(pipelineBuilder.build())

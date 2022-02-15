@@ -38,7 +38,7 @@ export interface CommitStageProperties extends ExecutionStageProperties {
 }
 
 export interface AcceptanceStageProperties extends ExecutionStageProperties{
-  readonly exposingEndpointsAsEnvVars?: boolean
+  readonly exposingEnvVars?: boolean
 }
 
 export interface ProductionStageProperties {
@@ -117,10 +117,10 @@ export class PipelineStack extends Stack {
       buildStepSetup["partialBuildSpec"] = this.buildReportingSpec(reportGroup.reportGroupArn, props.reporting)
     }
 
-    if(props.exposingEndpointsAsEnvVars){
-      buildStepSetup["envFromCfnOutputs"] = deployedInfrastructure.endpoints
+    if(props.exposingEnvVars){
+      buildStepSetup["envFromCfnOutputs"] = deployedInfrastructure.envvars
 
-      let commands = this.buildEnvironmentVariableExportCommands(deployedInfrastructure.endpoints)
+      let commands = this.buildEnvironmentVariableExportCommands(deployedInfrastructure.envvars)
       commands = commands.concat(props.executingCommands)
 
       buildStepSetup["commands"] = commands
@@ -129,10 +129,10 @@ export class PipelineStack extends Stack {
     return this.buildBuildStep("AcceptanceTest", buildStepSetup, reportGroup)
   }
 
-  private buildEnvironmentVariableExportCommands(endpoints: Record<string, CfnOutput>) {
+  private buildEnvironmentVariableExportCommands(envvars: Record<string, CfnOutput>) {
     let exportEnvCommands = Array()
     let envName: keyof Record<string, CfnOutput>
-    for (envName in endpoints) {
+    for (envName in envvars) {
       exportEnvCommands.push("export " + envName + "=$" + envName)
     }
     return exportEnvCommands

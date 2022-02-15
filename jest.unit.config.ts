@@ -7,6 +7,7 @@ verbose: true,
 name: "unit",
 displayName: "Unit Tests",
 preset: "ts-jest",
+testEnvironment: "node",
 testMatch: ["**/unit-tests/*tests.ts"],
 reporters: [
     'default',

@@ -1,16 +1,20 @@
 
-import { Construct, Duration, Stack, StackProps, CfnOutput } from "@aws-cdk/core"
+import { Construct, Duration, StackProps } from "@aws-cdk/core"
 import { LambdaIntegration, RestApi } from "@aws-cdk/aws-apigateway"
 import { Function, Runtime } from "@aws-cdk/aws-lambda"
 import {NodejsFunction} from "@aws-cdk/aws-lambda-nodejs"
+import {EnvvarsStack} from "../../provisioning/envvars-stack"
 import * as path from "path"
 
-export class SignupStack extends Stack {
+interface SignupStackProps extends StackProps {
+  memberTable: string;
+}
+
+export class SignupStack extends EnvvarsStack {
   private restApi: RestApi
-  private lambda: Function
-  public readonly endpoint: CfnOutput
+  public readonly lambda: Function
     
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, props: SignupStackProps) {
     super(scope, id, props);
   
     this.lambda = new NodejsFunction(this, "SignupFunction", {
@@ -18,7 +22,10 @@ export class SignupStack extends Stack {
       timeout: Duration.seconds(5),
       runtime: Runtime.NODEJS_14_X,
       handler: "lambdaHandler",
-      entry: path.join(__dirname, "signup.ts")
+      entry: path.join(__dirname, "signup.ts"),
+      environment: {
+         MemberTable: props.memberTable
+      }
     })
 
     this.restApi = new RestApi(this, "Api", {
@@ -29,7 +36,7 @@ export class SignupStack extends Stack {
 
     memberSignup.addMethod("POST", new LambdaIntegration(this.lambda, {}))
 
-    this.endpoint = new CfnOutput(this, "endpoint", {value: this.restApi.url + "member/signup"})
+    this.addEnvvar("MemberSignupEndpoint", this.restApi.url + "member/signup")
   }
 } 
 

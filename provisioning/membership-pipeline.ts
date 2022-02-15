@@ -23,7 +23,7 @@ pipeline.withAcceptanceStage(
     extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
     executingCommands: ["npm ci", "npm run test:component"],
     reporting: {fromDirectory: "reports/component-tests", withFiles: ["test-results.xml", "tests.log"], exportingTo: ExportType.S3},
-    exposingEndpointsAsEnvVars: true
+    exposingEnvVars: true
   }
 )
 pipeline.withProductionStage(

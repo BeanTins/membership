@@ -18,12 +18,12 @@ export class TestStageFactory implements StageFactory {
 }
 
 class TestStage extends Stage {
-  private testEndpoint: CfnOutput
-  get endpoints(): Record<string, CfnOutput> {return {testFunction: this.testEndpoint} }
+  private testEnvvars: CfnOutput
+  get envvars(): Record<string, CfnOutput> {return {testFunction: this.testEnvvars} }
   constructor(scope: Construct, id: string) {
     super(scope, id)
     const testStack = new TestStack(this, "TestStack")
-    this.testEndpoint = testStack.bucketName
+    this.testEnvvars = testStack.bucketName
   }
 }
 

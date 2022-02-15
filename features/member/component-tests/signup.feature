@@ -3,16 +3,17 @@ Feature: Member signup
 
 Scenario: New member can successfully sign up
 
-Given I am not registered
-When I enter my name as Bob
-And I enter my email as "Bob@gmail.com"
-And I signup
-Then I receive a 201 response code
+Given a new prospective member Sally Cinnamon
+When they try to signup
+Then they are confirmed as a new member
 
-Scenario: New member cannot sign up without an email
+Scenario: New member cannot sign up without correct details
+Given a member Roger Ramjet with invalid details
+When they try to signup
+Then their signup request is rejected as it was invalid
 
-Given I am not registered
-When I enter my name as Johab
-And I signup
-Then I receive a 400 response code
-And I receive the message "no email specified for signup"
+Scenario: Existing member cannot re-sign up
+
+Given an existing member Tom Thumb
+When they try to signup
+Then their signup request is rejected as they are already a member

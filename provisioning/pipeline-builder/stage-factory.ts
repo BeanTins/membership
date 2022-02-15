@@ -2,7 +2,7 @@ import { Construct, Stage, CfnOutput } from "@aws-cdk/core"
 
 export interface DeploymentStage extends Stage
 {
-  readonly endpoints: Record<string, CfnOutput>  
+  readonly envvars: Record<string, CfnOutput>  
 }
 
 export interface StageFactory {

@@ -1,5 +1,5 @@
 {
-  "app": "npx ts-node --prefer-ts-exts provisioning/membership-pipeline.ts",
+  "app": "npx ts-node --prefer-ts-exts provisioning/membership-dev.ts",
   "watch": {
     "include": [
       "**"

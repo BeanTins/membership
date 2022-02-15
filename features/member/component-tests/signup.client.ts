@@ -1,30 +1,6 @@
-import {readFileSync, existsSync} from "fs"
 import got from "got"
 import logger from "./logger"
-import * as path from "path"
-
-function retrieveEndpoint()
-{
-    var endpoint: string | undefined
-    const deployOutputsFile: string = path.join(__dirname, "../../../awsDeploy.json")
-
-    if (existsSync(deployOutputsFile))
-    {
-        const deployOutputs = JSON.parse(readFileSync(deployOutputsFile).toString())
-        endpoint = deployOutputs["MembershipDevStage-MemberSignup"].endpoint
-    }
-    else 
-    {
-        endpoint = process.env.memberSignupEndpoint
-    }
-
-    if (endpoint == undefined)
-    {
-        throw Error("signup url undefined")
-    }
-
-    return endpoint
-}
+import {resolveOutput} from "./output-resolver"
 
 export async function signupMember(name: string | null, email: string | null)
 {
@@ -40,7 +16,7 @@ export async function signupMember(name: string | null, email: string | null)
     }
 
     try{
-        const url = retrieveEndpoint()
+        const url = resolveOutput("MembershipDevStage-MemberSignup", "MemberSignupEndpoint")
 
         logger.verbose("member signup url - " + url)
 

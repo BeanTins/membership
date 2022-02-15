@@ -8,10 +8,11 @@ let template: Template
 beforeEach(() => {
   const app = new App();
 
-  const stack = new SignupStack(app, "MemberSignupStack");
+  const stack = new SignupStack(app, "MemberSignupStack",{memberTable: ""});
     
   template = Template.fromStack(stack);
 })
+
 test("lambda setup", () => {
   
   template.hasResourceProperties("AWS::Lambda::Function", {
@@ -33,7 +34,7 @@ test("endpoint connected to lambda", () => {
 })
 
 test("endpoint url output", () => {
-  template.hasOutput("endpoint", {
+  template.hasOutput("MemberSignupEndpoint", {
     Value: Match.anyValue()
   })
 
