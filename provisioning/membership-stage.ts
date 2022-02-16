@@ -1,9 +1,9 @@
 import { SignupStack } from "../features/member/signup-stack"
 import { MemberTableStack } from "./member-table-stack"
-import {IPrincipal} from "@aws-cdk/aws-iam"
+import { Role } from "@aws-cdk/aws-iam"
 import { DeploymentStage } from "./pipeline-builder/deployment-stage"
 
-import { CfnOutput, Construct, StageProps, Stage } from "@aws-cdk/core"
+import { CfnOutput, Construct, StageProps, Stage, Fn } from "@aws-cdk/core"
 
 export class MembershipStage extends Stage implements DeploymentStage{
   private readonly signup: SignupStack
@@ -23,9 +23,15 @@ export class MembershipStage extends Stage implements DeploymentStage{
     this.memberTable.grantAccessTo(this.signup.lambda.grantPrincipal)
   }
 
-  grantAccessTo(accessor: IPrincipal)
+  grantAccessTo(accessorRoleArn: string)
   {
-    this.memberTable.grantAccessTo(accessor)
+      const role = Role.fromRoleArn(this, "Role", accessorRoleArn, {
+        mutable: true,
+      });
+
+    // const importedIamRole = Fn.importValue("StageAccessorIamRole")
+
+    this.memberTable.grantAccessTo(role)
   }
 }
 

@@ -26,7 +26,7 @@ class TestStage extends Stage {
     const testStack = new TestStack(this, "TestStack")
     this.testEnvvars = testStack.bucketName
   }
-  grantAccessTo(){}
+  grantAccessTo(iamRole: string){}
 }
 
 class TestStack extends Stack {
