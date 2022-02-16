@@ -25,7 +25,7 @@ export class MembershipStage extends Stage implements DeploymentStage{
 
   grantAccessTo(accessor: IPrincipal)
   {
-    this.memberTable.grantAccessTo(this.signup.lambda.grantPrincipal)
+    this.memberTable.grantAccessTo(accessor)
   }
 }
 
