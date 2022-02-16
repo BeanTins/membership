@@ -4,6 +4,7 @@ import { ReportGroup, BuildSpec } from "@aws-cdk/aws-codebuild"
 import { Bucket } from "@aws-cdk/aws-s3"
 import { StageFactory } from "./stage-factory"
 import { DeploymentStage } from "./deployment-stage"
+import { Role, ServicePrincipal } from "@aws-cdk/aws-iam"
 
 export enum SCM {
   GitHub = 1
@@ -79,14 +80,9 @@ export class PipelineStack extends Stack {
       const buildStep = this.buildAcceptanceStageStep(props.acceptanceStage, acceptanceDeploymentStage)
 
       this.deferredReportGroupPermissionChanges.push(() => {
-        new CfnOutput(this, "StageAccessIamRole", {
-          value: buildStep.project.role!.roleArn,
-          description: 'The name of the s3 bucket',
-          exportName: 'StageAccessorIamRole',
-        })
-  
         acceptanceDeploymentStage.grantAccessTo("StageAccessorIamRole")
       })
+
       pipeline.addStage(acceptanceDeploymentStage, { post: [buildStep] })
     }
 
@@ -136,6 +132,19 @@ export class PipelineStack extends Stack {
 
       buildStepSetup["commands"] = commands
    }
+
+   const role = new Role(this, 'TestRole', {
+    assumedBy: new ServicePrincipal('sns.amazonaws.com'),
+    roleName: "TestRole2"
+   })
+
+   new CfnOutput(this, "StageAccessIamRole", {
+    value: role.roleArn,
+    description: 'role used to access resources under test',
+    exportName: 'StageAccessorIamRole',
+  })   
+
+   buildStepSetup["role"] = role
 
     return this.buildBuildStep("AcceptanceTest", buildStepSetup, reportGroup)
   }

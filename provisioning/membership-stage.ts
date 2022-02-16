@@ -14,7 +14,7 @@ export class MembershipStage extends Stage implements DeploymentStage{
   }
   
   constructor(scope: Construct, id: string, props?: StageProps) {
-    super(scope, id, props);
+    super(scope, id, props)
 
     this.memberTable = new MemberTableStack(this, "MemberTable")
 
@@ -25,12 +25,7 @@ export class MembershipStage extends Stage implements DeploymentStage{
 
   grantAccessTo(accessorRoleArn: string)
   {
-    console.log("accessorRoleArn - " + accessorRoleArn)
-      const role = Role.fromRoleArn(this, "Role", accessorRoleArn, {
-        mutable: true,
-      });
-
-    this.memberTable.grantAccessTo(role)
+    this.memberTable.grantAccessToExternalRole(accessorRoleArn)
   }
 }
 
