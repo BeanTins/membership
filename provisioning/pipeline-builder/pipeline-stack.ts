@@ -77,16 +77,15 @@ export class PipelineStack extends Stack {
       const acceptanceDeploymentStage = this.stageFactory.create(this, "AcceptanceTest")
     
       const buildStep = this.buildAcceptanceStageStep(props.acceptanceStage, acceptanceDeploymentStage)
-     
+
+      new CfnOutput(this, "StageAccessIamRole", {
+        value: buildStep.project.role!.roleArn,
+        description: 'The name of the s3 bucket',
+        exportName: 'StageAccessorIamRole',
+      });
+    
       this.deferredReportGroupPermissionChanges.push(() => {
-        new CfnOutput(this, "StageAccessIamRole", {
-          value: buildStep.project.role!.roleArn,
-          description: 'The name of the s3 bucket',
-          exportName: 'StageAccessorIamRole',
-        });
-        
-  
-        //acceptanceDeploymentStage.grantAccessTo(buildStep.grantPrincipal)
+        acceptanceDeploymentStage.grantAccessTo("StageAccessorIamRole")
       })
       pipeline.addStage(acceptanceDeploymentStage, { post: [buildStep] })
     }

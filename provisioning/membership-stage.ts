@@ -25,11 +25,10 @@ export class MembershipStage extends Stage implements DeploymentStage{
 
   grantAccessTo(accessorRoleArn: string)
   {
+    console.log("accessorRoleArn - " + accessorRoleArn)
       const role = Role.fromRoleArn(this, "Role", accessorRoleArn, {
         mutable: true,
       });
-
-    // const importedIamRole = Fn.importValue("StageAccessorIamRole")
 
     this.memberTable.grantAccessTo(role)
   }
