@@ -1,9 +1,5 @@
-import { Construct, Stage, CfnOutput } from "@aws-cdk/core"
-
-export interface DeploymentStage extends Stage
-{
-  readonly envvars: Record<string, CfnOutput>  
-}
+import { Construct } from "@aws-cdk/core"
+import { DeploymentStage } from "./deployment-stage"
 
 export interface StageFactory {
   create(scope: Construct, name: string): DeploymentStage;

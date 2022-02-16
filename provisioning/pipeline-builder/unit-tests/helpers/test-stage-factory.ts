@@ -1,5 +1,6 @@
 import { Stage, Construct, Stack, CfnOutput } from "@aws-cdk/core"
-import { StageFactory, DeploymentStage } from "../../stage-factory"
+import { StageFactory } from "../../stage-factory"
+import { DeploymentStage } from "../../deployment-stage"
 import { Bucket } from "@aws-cdk/aws-s3"
 
 export class TestStageFactory implements StageFactory {
@@ -25,6 +26,7 @@ class TestStage extends Stage {
     const testStack = new TestStack(this, "TestStack")
     this.testEnvvars = testStack.bucketName
   }
+  grantAccessTo(){}
 }
 
 class TestStack extends Stack {

@@ -2,7 +2,8 @@ import { Construct, Stack, RemovalPolicy, CfnOutput } from "@aws-cdk/core"
 import { CodePipeline, CodePipelineSource, CodeBuildStep, ManualApprovalStep } from "@aws-cdk/pipelines"
 import { ReportGroup, BuildSpec } from "@aws-cdk/aws-codebuild"
 import { Bucket } from "@aws-cdk/aws-s3"
-import { StageFactory, DeploymentStage } from "./stage-factory"
+import { StageFactory } from "./stage-factory"
+import { DeploymentStage } from "./deployment-stage"
 
 export enum SCM {
   GitHub = 1
@@ -75,8 +76,12 @@ export class PipelineStack extends Stack {
 
       const acceptanceDeploymentStage = this.stageFactory.create(this, "AcceptanceTest")
     
-      pipeline.addStage(acceptanceDeploymentStage,
-      { post: [this.buildAcceptanceStageStep(props.acceptanceStage, acceptanceDeploymentStage)] })
+      const buildStep = this.buildAcceptanceStageStep(props.acceptanceStage, acceptanceDeploymentStage)
+     
+      this.deferredReportGroupPermissionChanges.push(() => {
+        acceptanceDeploymentStage.grantAccessTo(buildStep.grantPrincipal)
+      })
+      pipeline.addStage(acceptanceDeploymentStage, { post: [buildStep] })
     }
 
     if (props.productionStage != undefined){
