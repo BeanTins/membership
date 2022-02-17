@@ -5,22 +5,22 @@ import {EnvvarsStack} from "./envvars-stack"
 import { Role } from "@aws-cdk/aws-iam"
 
 
-export class MemberTableStack extends EnvvarsStack {
-  public readonly memberTable: Table
+export class MemberTable extends EnvvarsStack {
+  private readonly memberTable: Table
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props)
-    this.memberTable = new Table(this, 'Table', {
-      partitionKey: { name: 'id', type: AttributeType.STRING },
+    this.memberTable = new Table(this, "Table", {
+      partitionKey: { name: "id", type: AttributeType.STRING },
       removalPolicy: RemovalPolicy.DESTROY,
     })
 
     this.memberTable.addGlobalSecondaryIndex({
-      indexName: 'emailIndex',
+      indexName: "emailIndex",
       partitionKey: {name: "email", type: AttributeType.STRING},
       readCapacity: 1,
       writeCapacity: 1,
       projectionType: ProjectionType.ALL,
-    });
+    })
 
     this.addEnvvar("MemberTable", this.memberTable.tableName)
   }
@@ -41,7 +41,12 @@ export class MemberTableStack extends EnvvarsStack {
       mutable: true,
     });
   
+    console.log("grant - " + role.grantPrincipal)
+
     this.memberTable.grantReadWriteData(role.grantPrincipal)
+
+    console.log("role - " + role)
+    console.log("end")
   }
 
   

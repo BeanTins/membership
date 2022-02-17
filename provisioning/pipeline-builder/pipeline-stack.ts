@@ -36,11 +36,17 @@ export interface ExecutionStageProperties {
   readonly reporting?: ReportingProperties
 }
 
+export interface ResourceAccess {
+  readonly named: string
+  readonly executingOperations: string[]
+}
+
 export interface CommitStageProperties extends ExecutionStageProperties {
 }
 
 export interface AcceptanceStageProperties extends ExecutionStageProperties{
   readonly exposingEnvVars?: boolean
+  readonly accessingResourcesUnderTest?: ResourceAccess[]
 }
 
 export interface ProductionStageProperties {
@@ -78,10 +84,6 @@ export class PipelineStack extends Stack {
       const acceptanceDeploymentStage = this.stageFactory.create(this, "AcceptanceTest")
     
       const buildStep = this.buildAcceptanceStageStep(props.acceptanceStage, acceptanceDeploymentStage)
-
-      this.deferredReportGroupPermissionChanges.push(() => {
-        acceptanceDeploymentStage.grantAccessTo("StageAccessorIamRole")
-      })
 
       pipeline.addStage(acceptanceDeploymentStage, { post: [buildStep] })
     }
@@ -131,27 +133,30 @@ export class PipelineStack extends Stack {
       commands = commands.concat(props.executingCommands)
 
       buildStepSetup["commands"] = commands
-   }
+    }
 
-   const role = new Role(this, 'TestRole', {
-    assumedBy: new ServicePrincipal('codebuild.amazonaws.com'),
-    roleName: "TestRole2"
-   })
-
-   role.addToPolicy(new PolicyStatement(
-     {effect: Effect.ALLOW, resources: ["*"], actions:["sts:AssumeRole"]}))
-
-   role.addToPolicy(new PolicyStatement(
-     {effect: Effect.ALLOW, resources: ["*"], actions:["dynamodb:*"]}))
- 
-   new CfnOutput(this, "StageAccessIamRole", {
-    value: role.roleArn,
-    description: 'role used to access resources under test',
-    exportName: 'StageAccessorIamRole',
-  })   
-   buildStepSetup["role"] = role
+    buildStepSetup["role"] = this.buildAcceptanceTestRole(props)
 
     return this.buildBuildStep("AcceptanceTest", buildStepSetup, reportGroup)
+  }  
+
+  private buildAcceptanceTestRole(props: AcceptanceStageProperties) {
+    const role = new Role(this, "AcceptanceTestExecutionRole", {
+      assumedBy: new ServicePrincipal("codebuild.amazonaws.com"),
+      roleName: "AcceptanceTestExecutionRole"
+    })
+
+    if (props.accessingResourcesUnderTest != undefined) {
+      for (const accessingResources of props.accessingResourcesUnderTest) {
+        role.addToPolicy(new PolicyStatement(
+          {
+            effect: Effect.ALLOW,
+            resources: ["*/AcceptanceTest-" + accessingResources.named + "*"],
+            actions: accessingResources.executingOperations
+          }))
+      }
+    }
+    return role
   }
 
   private buildEnvironmentVariableExportCommands(envvars: Record<string, CfnOutput>) {
