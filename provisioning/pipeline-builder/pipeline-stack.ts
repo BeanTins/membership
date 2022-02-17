@@ -134,7 +134,7 @@ export class PipelineStack extends Stack {
    }
 
    const role = new Role(this, 'TestRole', {
-    assumedBy: new ServicePrincipal('sns.amazonaws.com'),
+    assumedBy: new ServicePrincipal('codebuild.amazonaws.com'),
     roleName: "TestRole2"
    })
 
