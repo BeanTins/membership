@@ -141,12 +141,14 @@ export class PipelineStack extends Stack {
    role.addToPolicy(new PolicyStatement(
      {effect: Effect.ALLOW, resources: ["*"], actions:["sts:AssumeRole"]}))
 
+   role.addToPolicy(new PolicyStatement(
+     {effect: Effect.ALLOW, resources: ["*"], actions:["dynamodb:*"]}))
+ 
    new CfnOutput(this, "StageAccessIamRole", {
     value: role.roleArn,
     description: 'role used to access resources under test',
     exportName: 'StageAccessorIamRole',
   })   
-
    buildStepSetup["role"] = role
 
     return this.buildBuildStep("AcceptanceTest", buildStepSetup, reportGroup)
