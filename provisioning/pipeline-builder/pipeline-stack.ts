@@ -4,7 +4,7 @@ import { ReportGroup, BuildSpec } from "@aws-cdk/aws-codebuild"
 import { Bucket } from "@aws-cdk/aws-s3"
 import { StageFactory } from "./stage-factory"
 import { DeploymentStage } from "./deployment-stage"
-import { Role, ServicePrincipal } from "@aws-cdk/aws-iam"
+import { Role, ServicePrincipal, PolicyStatement, Effect } from "@aws-cdk/aws-iam"
 
 export enum SCM {
   GitHub = 1
@@ -137,6 +137,9 @@ export class PipelineStack extends Stack {
     assumedBy: new ServicePrincipal('sns.amazonaws.com'),
     roleName: "TestRole2"
    })
+
+   role.addToPolicy(new PolicyStatement(
+     {effect: Effect.ALLOW, resources: ["*"], actions:["sts:AssumeRole"]}))
 
    new CfnOutput(this, "StageAccessIamRole", {
     value: role.roleArn,
