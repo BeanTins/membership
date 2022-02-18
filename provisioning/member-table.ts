@@ -1,5 +1,5 @@
 import {Table, AttributeType, ProjectionType} from "@aws-cdk/aws-dynamodb"
-import {Construct, StackProps, RemovalPolicy } from "@aws-cdk/core"
+import {Construct, StackProps, RemovalPolicy, CfnOutput } from "@aws-cdk/core"
 import {IPrincipal} from "@aws-cdk/aws-iam"
 import {EnvvarsStack} from "./envvars-stack" 
 
@@ -21,7 +21,11 @@ export class MemberTable extends EnvvarsStack {
     })
 
     this.addEnvvar("MemberTable", this.memberTable.tableName)
-    this.addEnvvar("MemberTableArn", this.memberTable.tableArn)
+    
+    new CfnOutput(this, "MemberTableArn", {
+      value: this.memberTable.tableArn,
+      exportName: 'MemberTableArn',
+    })
   }
 
   get name(): string {
