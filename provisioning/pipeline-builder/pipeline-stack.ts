@@ -1,4 +1,4 @@
-import { Construct, Stack, RemovalPolicy, CfnOutput } from "@aws-cdk/core"
+import { Construct, Stack, RemovalPolicy, CfnOutput, Fn } from "@aws-cdk/core"
 import { CodePipeline, CodePipelineSource, CodeBuildStep, ManualApprovalStep } from "@aws-cdk/pipelines"
 import { ReportGroup, BuildSpec } from "@aws-cdk/aws-codebuild"
 import { Bucket } from "@aws-cdk/aws-s3"
@@ -148,10 +148,11 @@ export class PipelineStack extends Stack {
 
     if (props.accessingResourcesUnderTest != undefined) {
       for (const accessingResources of props.accessingResourcesUnderTest) {
+
         role.addToPolicy(new PolicyStatement(
           {
             effect: Effect.ALLOW,
-            resources: ["*/AcceptanceTest-" + accessingResources.named + "*"],
+            resources: [Fn.importValue(accessingResources.named)],
             actions: accessingResources.executingOperations
           }))
       }

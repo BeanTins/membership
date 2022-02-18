@@ -1,9 +1,7 @@
 import {Table, AttributeType, ProjectionType} from "@aws-cdk/aws-dynamodb"
-import {Construct, StackProps, RemovalPolicy, Fn} from "@aws-cdk/core"
+import {Construct, StackProps, RemovalPolicy } from "@aws-cdk/core"
 import {IPrincipal} from "@aws-cdk/aws-iam"
 import {EnvvarsStack} from "./envvars-stack" 
-import { Role } from "@aws-cdk/aws-iam"
-
 
 export class MemberTable extends EnvvarsStack {
   private readonly memberTable: Table
@@ -23,6 +21,7 @@ export class MemberTable extends EnvvarsStack {
     })
 
     this.addEnvvar("MemberTable", this.memberTable.tableName)
+    this.addEnvvar("MemberTableArn", this.memberTable.tableArn)
   }
 
   get name(): string {
@@ -32,23 +31,5 @@ export class MemberTable extends EnvvarsStack {
   grantAccessTo(accessor: IPrincipal){
     this.memberTable.grantReadWriteData(accessor)
   }
-
-  grantAccessToExternalRole(accessor: string){
-    const importedIamRole = Fn.importValue(accessor)
-    console.log("externalRoleArn - " + importedIamRole)
-
-    const role = Role.fromRoleArn(this, "ExternalRole", importedIamRole, {
-      mutable: true,
-    });
-  
-    console.log("grant - " + role.grantPrincipal)
-
-    this.memberTable.grantReadWriteData(role.grantPrincipal)
-
-    console.log("role - " + role)
-    console.log("end")
-  }
-
-  
 }
 
