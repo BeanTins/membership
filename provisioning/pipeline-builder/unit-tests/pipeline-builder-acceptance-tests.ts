@@ -233,6 +233,27 @@ test("Pipeline with endpoints as environment variables", () => {
   }) 
 })
 
+test("Pipeline with access to test resources", () => {
+
+  pipelineBuilder.withAcceptanceStage(
+    {
+      extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
+      executingCommands: ["npm run test:component"],
+      withPermissionToAccess: [{resource: "TestResource", withAllowableOperations: ["dynamodb:*"]}]
+    }
+  )
+
+  const template = Template.fromStack(pipelineBuilder.build())
+
+  template.hasResourceProperties("AWS::IAM::Policy", {
+    PolicyDocument: Match.objectLike({
+      Statement: Match.arrayWith([Match.objectLike({
+        Action: "dynamodb:*",
+        Resource: {"Fn::ImportValue": "TestResource"}
+      })])
+    })
+  })
+})
 
 
 

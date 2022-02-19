@@ -37,8 +37,8 @@ export interface ExecutionStageProperties {
 }
 
 export interface ResourceAccess {
-  readonly named: string
-  readonly executingOperations: string[]
+  readonly resource: string
+  readonly withAllowableOperations: string[]
 }
 
 export interface CommitStageProperties extends ExecutionStageProperties {
@@ -46,7 +46,7 @@ export interface CommitStageProperties extends ExecutionStageProperties {
 
 export interface AcceptanceStageProperties extends ExecutionStageProperties{
   readonly exposingEnvVars?: boolean
-  readonly accessingResourcesUnderTest?: ResourceAccess[]
+  readonly withPermissionToAccess?: ResourceAccess[]
 }
 
 export interface ProductionStageProperties {
@@ -146,14 +146,14 @@ export class PipelineStack extends Stack {
       roleName: "AcceptanceTestExecutionRole"
     })
 
-    if (props.accessingResourcesUnderTest != undefined) {
-      for (const accessingResources of props.accessingResourcesUnderTest) {
+    if (props.withPermissionToAccess != undefined) {
+      for (const accessingResources of props.withPermissionToAccess) {
 
         role.addToPolicy(new PolicyStatement(
           {
             effect: Effect.ALLOW,
-            resources: [Fn.importValue(accessingResources.named)],
-            actions: accessingResources.executingOperations
+            resources: [Fn.importValue(accessingResources.resource)],
+            actions: accessingResources.withAllowableOperations
           }))
       }
     }

@@ -24,7 +24,7 @@ pipeline.withAcceptanceStage(
     executingCommands: ["npm ci", "npm run test:component"],
     reporting: {fromDirectory: "reports/component-tests", withFiles: ["test-results.xml", "tests.log"], exportingTo: ExportType.S3},
     exposingEnvVars: true,
-    accessingResourcesUnderTest: [{named: "MemberTableArn", executingOperations: ["dynamodb:*"]}]
+    withPermissionToAccess: [{resource: "MemberTableArn", withAllowableOperations: ["dynamodb:*"]}]
   }
 )
 pipeline.withProductionStage(
