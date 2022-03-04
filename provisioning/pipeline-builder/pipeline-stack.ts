@@ -30,10 +30,18 @@ export interface ReportingProperties {
   readonly exportingTo?: ExportType
 }
 
+interface ExternalResources {
+  [key: string]: any;
+}
+
 export interface ExecutionStageProperties {
   readonly extractingSourceFrom: SourceCodeProperties
   readonly executingCommands: string[]
   readonly reporting?: ReportingProperties
+}
+
+export interface DeployStageProperties {
+  readonly withExternalResources?: ExternalResources
 }
 
 export interface ResourceAccess {
@@ -44,12 +52,12 @@ export interface ResourceAccess {
 export interface CommitStageProperties extends ExecutionStageProperties {
 }
 
-export interface AcceptanceStageProperties extends ExecutionStageProperties{
+export interface AcceptanceStageProperties extends ExecutionStageProperties, DeployStageProperties{
   readonly exposingEnvVars?: boolean
   readonly withPermissionToAccess?: ResourceAccess[]
 }
 
-export interface ProductionStageProperties {
+export interface ProductionStageProperties extends DeployStageProperties{
   readonly manualApproval?: boolean
 }
 
@@ -81,7 +89,7 @@ export class PipelineStack extends Stack {
 
     if (props.acceptanceStage != undefined){
 
-      const acceptanceDeploymentStage = this.stageFactory.create(this, "AcceptanceTest")
+      const acceptanceDeploymentStage = this.stageFactory.create(this, "AcceptanceTest", "test", props.acceptanceStage.withExternalResources)
     
       const buildStep = this.buildAcceptanceStageStep(props.acceptanceStage, acceptanceDeploymentStage)
 
@@ -91,7 +99,7 @@ export class PipelineStack extends Stack {
     if (props.productionStage != undefined){
       let stepSetup: any = {}
  
-      const productionDeploymentStage = this.stageFactory.create(this, "Production")
+      const productionDeploymentStage = this.stageFactory.create(this, "Production", "prod", props.productionStage.withExternalResources)
     
       if (props.productionStage.manualApproval)
       {

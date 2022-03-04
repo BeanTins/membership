@@ -8,6 +8,7 @@ import * as path from "path"
 
 interface SignupStackProps extends StackProps {
   memberTable: string;
+  stageName: string
 }
 
 export class SignupStack extends EnvvarsStack {
@@ -15,7 +16,7 @@ export class SignupStack extends EnvvarsStack {
   public readonly lambda: Function
     
   constructor(scope: Construct, id: string, props: SignupStackProps) {
-    super(scope, id, props);
+    super(scope, id, props)
   
     this.lambda = new NodejsFunction(this, "SignupFunction", {
       memorySize: 1024,
@@ -29,6 +30,9 @@ export class SignupStack extends EnvvarsStack {
     })
 
     this.restApi = new RestApi(this, "Api", {
+      deployOptions: {
+        stageName: props.stageName,
+      }
     })
 
     const member = this.restApi.root.addResource("member")

@@ -3,6 +3,7 @@ import { App } from '@aws-cdk/core'
 import { ExportType, SCM } from './pipeline-builder/pipeline-stack'
 import { PipelineBuilder } from "./pipeline-builder/pipeline-builder"
 import { MembershipFactory} from "./membership-factory"
+import { resolveOutput} from "../features/member/infrastructure/output-resolver"
 
 const membershipFactory = new MembershipFactory()
 
@@ -12,11 +13,13 @@ const pipeline = new PipelineBuilder(app, membershipFactory)
 
 pipeline.withName("MembershipPipeline")
 
+const testUserPoolId = resolveOutput("MemberCredentialsTest", "userPoolId")
+
 pipeline.withCommitStage(
   {
     extractingSourceFrom: { provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main" },
     executingCommands: ["npm ci", "npm run build", "npm run test:unit", "npx cdk synth"],
-    reporting: {fromDirectory: "reports/unit-tests", withFiles: ["test-results.xml"]}
+    reporting: {fromDirectory: "reports/unit-tests", withFiles: ["test-results.xml"]},
   })
 pipeline.withAcceptanceStage(
   {
@@ -24,12 +27,13 @@ pipeline.withAcceptanceStage(
     executingCommands: ["npm ci", "npm run test:component"],
     reporting: {fromDirectory: "reports/component-tests", withFiles: ["test-results.xml", "tests.log"], exportingTo: ExportType.S3},
     exposingEnvVars: true,
-    withPermissionToAccess: [{resource: "MemberTableArn", withAllowableOperations: ["dynamodb:*"]}]
+    withPermissionToAccess: [{resource: "MemberTableArn-test", withAllowableOperations: ["dynamodb:*"]}],
+    withExternalResources: {userPoolId: testUserPoolId}
   }
 )
 pipeline.withProductionStage(
   {
-    manualApproval: true
+    manualApproval: true,
   }
 )
 

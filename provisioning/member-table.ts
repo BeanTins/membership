@@ -3,9 +3,13 @@ import {Construct, StackProps, RemovalPolicy, CfnOutput } from "@aws-cdk/core"
 import {IPrincipal} from "@aws-cdk/aws-iam"
 import {EnvvarsStack} from "./envvars-stack" 
 
+interface MemberTableProps extends StackProps {
+  postfixIdentifier: string;
+}
+
 export class MemberTable extends EnvvarsStack {
   private readonly memberTable: Table
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, props?: MemberTableProps) {
     super(scope, id, props)
     this.memberTable = new Table(this, "Table", {
       partitionKey: { name: "id", type: AttributeType.STRING },
@@ -24,7 +28,7 @@ export class MemberTable extends EnvvarsStack {
     
     new CfnOutput(this, "MemberTableArn", {
       value: this.memberTable.tableArn,
-      exportName: 'MemberTableArn',
+      exportName: "MemberTableArn-" + props?.postfixIdentifier,
     })
   }
 

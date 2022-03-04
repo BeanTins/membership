@@ -1,12 +1,12 @@
 export class HttpResponse{
     static created(item: string){
-      return {
-        statusCode: 201,
-        body: JSON.stringify({
-          message: item + " created"
-        }) 
-      }
+      return HttpResponse.build(201, item + " created")
     }
+
+    static ok(message: string){
+      return HttpResponse.build(200, message)
+    }
+    
     static error(error: any, statusCodeMap : Map<any, number>){
       
       let statusCode = 500
@@ -18,10 +18,15 @@ export class HttpResponse{
         }
       }
   
+      return HttpResponse.build(statusCode, error.message)
+    }
+
+    static build(statusCode: Number, message: string)
+    {
       return {
         statusCode: statusCode,
         body: JSON.stringify({
-          message: error.message
+          message: message
         }) 
       }
     }

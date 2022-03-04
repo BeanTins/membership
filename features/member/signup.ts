@@ -1,12 +1,10 @@
 
 import { APIGatewayEvent, Context, APIGatewayProxyResult } from "aws-lambda"
-import { DataMapperFactory } from "./infrastructure/data-mapper-factory"
 import { Member, InvalidMemberOperation } from "./domain/member"
 import { InvalidName } from "./domain/name"
 import { InvalidEmailAddress } from "./domain/email-address"
 import { MemberDynamoDBRepository } from "./infrastructure/member-dynamodb-repository"
-import { DataMapper } from "@aws/dynamodb-data-mapper"
-import { MemberSnapshot } from "./infrastructure/member-snapshot"
+import { MemberQuery} from "./infrastructure/member-query"
 import { HttpResponse } from "./infrastructure/http-response"
 import logger from "./infrastructure/logger"
 
@@ -19,7 +17,7 @@ export const lambdaHandler = async (event: APIGatewayEvent, context: Context): P
 export class SignupController {
 
   async signup(signupDTO: any) {
-    var response: APIGatewayProxyResult
+    var response: any
 
     try {
       const command = this.parseCommand(signupDTO)
@@ -69,16 +67,16 @@ export class SignupController {
 export class SignupCommandHandler {
 
   private repository: MemberDynamoDBRepository
-  private dynamoDBDataMapper: DataMapper
+  private memberQuery: MemberQuery
 
   public constructor() {
     this.repository = new MemberDynamoDBRepository()
-    this.dynamoDBDataMapper = DataMapperFactory.create()
+    this.memberQuery = new MemberQuery()
   }
 
   async handle(command: SignupCommand) {
 
-    var member: Member|undefined = await this.loadMemberFromEmail(command.email)
+    var member: Member|undefined = await this.memberQuery.withEmail(command.email)
 
     if (member == undefined)
     {
@@ -88,19 +86,6 @@ export class SignupCommandHandler {
     member.signup()
 
     await this.repository.save(member)
-  }
-
-  private async loadMemberFromEmail(email: string): Promise<Member|undefined> {
-    var member: Member|undefined = undefined
-    const matchingItemIterator = this.dynamoDBDataMapper.query(MemberSnapshot, { email: email }, {indexName: "emailIndex"})
-
-    for await (const matchingMember of matchingItemIterator)
-    {
-      member = matchingMember.toMember()
-      break
-    }
-
-    return Promise.resolve(member)
   }
 }
 

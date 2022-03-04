@@ -1,8 +1,8 @@
 
 import { loadFeatures, autoBindSteps } from "jest-cucumber";
 
-import { SignupSteps } from "./signup.steps";
+import { MemberSteps } from "./helpers/member.steps";
 
 const features = loadFeatures("**/*.feature");
-autoBindSteps(features, [ SignupSteps ]);
+autoBindSteps(features, [ MemberSteps ]);
 

@@ -11,8 +11,10 @@
     "cdk": "cdk",
     "test:component": "jest --projects jest.component.config.ts",
     "test:unit": "jest --projects jest.unit.config.ts",
+    "deploy:credentials": "npx cdk deploy MemberCredentialsDev --outputs-file memberCredentialsDevDeploy_outputs.json --app \"npx ts-node --prefer-ts-exts provisioning/member-credentials-dev.ts\"",
+    "deploy:credentials:test": "npx cdk deploy MemberCredentialsTest --outputs-file memberCredentialsTestDeploy_outputs.json --app \"npx ts-node --prefer-ts-exts provisioning/member-credentials-test.ts\"",
     "deploy:pipeline": "npx cdk deploy PipelineStack/*/*",
-    "deploy": "npx cdk deploy MembershipDevStage/* --outputs-file awsDeploy.json --app \"npx ts-node --prefer-ts-exts provisioning/membership-dev.ts\"",
+    "deploy": "npx cdk deploy MembershipDevStage/* --outputs-file awsDeploy_outputs.json --app \"npx ts-node --prefer-ts-exts provisioning/membership-dev.ts\"",
     "synth": "npx cdk synth --app \"npx ts-node --prefer-ts-exts provisioning/membership-dev.ts\""
   },
   "devDependencies": {
@@ -39,11 +41,13 @@
     "@aws/dynamodb-data-mapper": "^0.7.3",
     "@aws/dynamodb-data-mapper-annotations": "^0.7.3",
     "@types/aws-lambda": "^8.10.85",
+    "amazon-cognito-identity-js-typescript": "^1.22.0",
     "aws-cdk-lib": "2.0.0",
     "aws-sdk": "^2.1059.0",
     "constructs": "^10.0.0",
     "jsonpath-plus": "^6.0.1",
     "source-map-support": "^0.5.16",
-    "typescript": "^4.5.2"
+    "typescript": "^4.5.2",
+    "winston-cloudwatch": "^3.1.1"
   }
 }

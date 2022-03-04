@@ -53,6 +53,15 @@ export class Member extends Entity {
     }
     this.status = Status.PendingVerification
   }
+
+  public verify()
+  {
+    if (this.status == Status.New)
+    {
+      throw new InvalidMemberOperation("member has not signed up")
+    }
+    this.status = Status.Active
+  }
 }
 
 

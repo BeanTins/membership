@@ -28,7 +28,9 @@ logger = createLogger({
 function buildTransports() {
   let transportList
   if (runningInLambda) {
-    transportList = [new transports.Console({ level: "info", format: consoleFormat })]
+    transportList = [
+      new transports.Console({ level: "info", format: consoleFormat })
+    ]
   }
 
   else {

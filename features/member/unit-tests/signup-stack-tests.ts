@@ -8,7 +8,7 @@ let template: Template
 beforeEach(() => {
   const app = new App();
 
-  const stack = new SignupStack(app, "MemberSignupStack",{memberTable: ""});
+  const stack = new SignupStack(app, "MemberSignupStack",{memberTable: "", stageName: "dev"});
     
   template = Template.fromStack(stack);
 })

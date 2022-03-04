@@ -10,8 +10,8 @@ test("snapshot to member", async() => {
   memberSnapshot.status = "active"
 
   var member = memberSnapshot.toMember()
-  expect(member["name"]).toBe("jim")
-  expect(member["email"]).toBe("jim@gmail.com")
+  expect(member["name"]["value"]).toBe("jim")
+  expect(member["email"]["value"]).toBe("jim@gmail.com")
   expect(member["status"]).toBe("active")
   expect(member["id"]).toBe("123e4567-e89b-12d3-a456-426614174000")
 })

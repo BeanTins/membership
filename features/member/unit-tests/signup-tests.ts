@@ -1,30 +1,23 @@
-
-
 import { lambdaHandler } from "../signup"
 import { APIGatewayEvent, Context,APIGatewayProxyResult } from "aws-lambda"
 import { DataMapperFactory } from "../../member/infrastructure/data-mapper-factory"
-import { MemberSnapshot } from "../infrastructure/member-snapshot"
 import { Status } from "../domain/member"
+import { MembersDataMapperMock} from "./helpers/members-data-mapper-mock"
 
 const mockUUid = jest.fn()
 
 jest.mock('uuid', () => ({ v4: () => mockUUid() }))
 
-const mockDataMapperPut = jest.fn()
-const mockDataMapperQuery = jest.fn()
-
-var event: APIGatewayEvent, context: Context
+let event: APIGatewayEvent, context: Context
+let membersDataMapper: MembersDataMapperMock
 
 beforeEach(() => {
   jest.clearAllMocks()
-  DataMapperFactory.create = jest.fn().mockImplementation(() => {
-    return {
-      put: (item: any) => mockDataMapperPut(item),
-      query: () => mockDataMapperQuery()
-    }
-  })
 
-  mockDataMapperQueryResponse([])
+  membersDataMapper = new MembersDataMapperMock()
+  DataMapperFactory.create = membersDataMapper.map()
+
+  membersDataMapper.queryResponse([])
 })
 
 test("signup successful for new user", async () => {
@@ -37,8 +30,11 @@ test("signup successful for new user", async () => {
 })
 
 test("signup successful for user that has already initiated signup", async () => {
-  mockDataMapperQueryResponse([
-    buildSnapshot("Bob", "bob@gmail.com", Status.PendingVerification, "123e4567-e89b-12d3-a456-426614174000")])
+  membersDataMapper.queryResponse([
+    {name: "Bob", 
+     email:"bob@gmail.com", 
+     status: Status.PendingVerification, 
+     id: "123e4567-e89b-12d3-a456-426614174000"}])
 
   requestSignupOf("Bob", "bob@gmail.com")
 
@@ -129,7 +125,7 @@ test("signup stores the member", async () => {
 
   const result:APIGatewayProxyResult = await lambdaHandler(event, context)
 
-  expect(mockDataMapperPut).toBeCalledWith(
+  expect(membersDataMapper.put).toBeCalledWith(
     expect.objectContaining({
       email: "jim@gmail.com",
       name: "jim",
@@ -141,8 +137,11 @@ test("signup stores the member", async () => {
 
 test("signup fails when pre-existing member past signup stage", async () => {
 
-  mockDataMapperQueryResponse([
-    buildSnapshot("jim", "jim@gmail.com", Status.Active, "123e4567-e89b-12d3-a456-426614174000")])
+  membersDataMapper.queryResponse([
+    {name: "jim", 
+     email: "jim@gmail.com", 
+     status: Status.Active, 
+     id: "123e4567-e89b-12d3-a456-426614174000"}])
 
   requestSignupOf("jim", "jim@gmail.com")
 
@@ -151,31 +150,6 @@ test("signup fails when pre-existing member past signup stage", async () => {
   expect(result.statusCode).toBe(409)
   expect(result.body).toBe(JSON.stringify({message: "member already signed up"}))
 })
-
-function mockDataMapperQueryResponse(members: MemberSnapshot[]) {
-  const myAsyncIterable = {
-    *[Symbol.asyncIterator]() {
-      for (const member of members)
-      {
-        yield member
-      }
-    }
-  }
-
-  mockDataMapperQuery.mockReturnValue(myAsyncIterable)
-}
-
-function buildSnapshot(name: string, email: string, status: Status, id: string)
-{
-  var snapshot = new MemberSnapshot()
-
-  snapshot.name = name
-  snapshot.email = email
-  snapshot.status = status
-  snapshot.id = id
-
-  return snapshot
-}
 
 function requestSignupOf(name: string|null, email: string|null){
   event = {
