@@ -13,8 +13,6 @@ const pipeline = new PipelineBuilder(app, membershipFactory)
 
 pipeline.withName("MembershipPipeline")
 
-const testUserPoolId = resolveOutput("MemberCredentialsTest", "userPoolId")
-
 pipeline.withCommitStage(
   {
     extractingSourceFrom: { provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main" },
@@ -28,7 +26,6 @@ pipeline.withAcceptanceStage(
     reporting: {fromDirectory: "reports/component-tests", withFiles: ["test-results.xml", "tests.log"], exportingTo: ExportType.S3},
     exposingEnvVars: true,
     withPermissionToAccess: [{resource: "MemberTableArn-test", withAllowableOperations: ["dynamodb:*"]}],
-    withExternalResources: {userPoolId: testUserPoolId}
   }
 )
 pipeline.withProductionStage(

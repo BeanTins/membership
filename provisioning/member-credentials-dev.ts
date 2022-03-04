@@ -6,6 +6,7 @@ import { MemberCredentials } from "./member-credentials"
 const app = new App()
 new MemberCredentials(app, "MemberCredentialsDev", {
   env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+  stageName: "dev" 
 })
 
 app.synth()

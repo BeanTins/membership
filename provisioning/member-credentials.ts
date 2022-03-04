@@ -4,17 +4,22 @@ import {UserPool,
   UserPoolClientIdentityProvider, 
   ClientAttributes} from "@aws-cdk/aws-cognito"
 import {Stack, App, StackProps, RemovalPolicy, CfnOutput} from "@aws-cdk/core"
+import {StringParameter, ParameterType, ParameterTier} from "@aws-cdk/aws-ssm"
+
+interface MemberCredentialsProps extends StackProps {
+  stageName: string
+}
 
 export class MemberCredentials extends Stack {
-  constructor(scope: App, id: string, props?: StackProps) {
-    super(scope, id, props);
+  constructor(scope: App, id: string, props: MemberCredentialsProps) {
+    super(scope, id, props)
 
-    const userPool = this.buildUserPool(id)
+    const userPool = this.buildUserPool(id, props.stageName)
   
     const client = this.buildUserPoolClient(userPool)
   }
 
-  private buildUserPool(id: string) {
+  private buildUserPool(id: string, stageName: string) {
     const userPool = new UserPool(this, 'MemberCredentials', {
       userPoolName: id,
       selfSignUpEnabled: true,
@@ -38,6 +43,15 @@ export class MemberCredentials extends Stack {
 
     new CfnOutput(this, 'userPoolId', {
       value: userPool.userPoolId,
+    })
+
+    new StringParameter(this, "userPoolId_" + stageName, {
+      parameterName: "userPoolId_" + stageName,
+      stringValue: userPool.userPoolId,
+      description: "the member credentials Id for stage environment " + stageName,
+      type: ParameterType.STRING,
+      tier: ParameterTier.STANDARD,
+      allowedPattern: ".*",
     })
 
     return userPool
