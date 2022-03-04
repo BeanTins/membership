@@ -13,8 +13,8 @@ jest.mock('uuid', () => ({ v4: () => mockUUid() }))
 
 beforeEach(() => {
   jest.clearAllMocks()
+  membersDataMapper = new MembersDataMapperMock()
   DataMapperFactory.create = membersDataMapper.map()
-  membersDataMapper.queryResponse([])
 })
 
 test("verify activates member", async () => {
@@ -34,8 +34,8 @@ test("verify activates member", async () => {
 })
 
 test("verify failure logged when member unknown", async () => {
-  const loggerVerboseSpy = jest.spyOn(logger, "verbose")
   membersDataMapper.queryResponse([])
+  const loggerVerboseSpy = jest.spyOn(logger, "error")
   confirmMember("bob@gmail.com")
 
   await lambdaHandler(event, context)
