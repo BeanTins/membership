@@ -28,7 +28,7 @@ export class MemberTable extends EnvvarsStack {
     
     new CfnOutput(this, "MemberTableArn" + props?.postfixIdentifier, {
       value: this.memberTable.tableArn,
-      exportName: "MemberTableArn-" + props?.postfixIdentifier,
+      exportName: "MemberTableArn" + props?.postfixIdentifier,
     })
   }
 
