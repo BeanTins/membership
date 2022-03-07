@@ -155,7 +155,7 @@ export class PipelineStack extends Stack {
         role.addToPolicy(new PolicyStatement(
           {
             effect: Effect.ALLOW,
-            resources: [Fn.importValue(accessingResources.resource)],
+            resources: [accessingResources.resource],
             actions: accessingResources.withAllowableOperations
           }))
       }

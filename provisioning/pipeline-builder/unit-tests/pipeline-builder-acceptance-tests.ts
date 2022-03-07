@@ -255,7 +255,7 @@ test("Pipeline with access to test resources", () => {
     PolicyDocument: Match.objectLike({
       Statement: Match.arrayWith([Match.objectLike({
         Action: "dynamodb:*",
-        Resource: {"Fn::ImportValue": "TestResource"}
+        Resource: "TestResource"
       })])
     })
   })

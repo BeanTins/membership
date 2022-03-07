@@ -1,9 +1,10 @@
 #!/usr/bin/env node
-import { App } from '@aws-cdk/core'
+import { App, Fn } from '@aws-cdk/core'
 import { ExportType, SCM } from './pipeline-builder/pipeline-stack'
 import { PipelineBuilder } from "./pipeline-builder/pipeline-builder"
 import { MembershipFactory} from "./membership-factory"
-import { resolveOutput} from "../features/member/infrastructure/output-resolver"
+
+const memberTableArn = Fn.importValue("MemberTableArntest")
 
 const membershipFactory = new MembershipFactory()
 
@@ -26,7 +27,7 @@ pipeline.withAcceptanceStage(
     reporting: {fromDirectory: "reports/component-tests", withFiles: ["test-results.xml", "tests.log"], exportingTo: ExportType.S3},
     exposingEnvVars: true,
     withPermissionToAccess: [
-      {resource: "MemberTableArntest", withAllowableOperations: ["dynamodb:*"]},
+      {resource: memberTableArn, withAllowableOperations: ["dynamodb:*"]},
       {resource: "*_test", withAllowableOperations: ["ssm:GetParameter"]}]
   }
 )
