@@ -45,6 +45,10 @@ export class MemberCredentials extends Stack {
                         "the member credentials Id for stage environment " + stageName,
                         userPool.userPoolId)
 
+    this.buildParameter("userPoolArn_" + stageName, 
+                        "the member credentials Arn for stage environment " + stageName,
+                        userPool.userPoolArn)
+
     return userPool
   }
 

@@ -15,7 +15,7 @@ let memberTable: MemberTableAccessor
 beforeEach(async () => {
   name = null
   email = null
-  memberCredentials = new MemberCredentialsAccessor()
+  memberCredentials = new MemberCredentialsAccessor("us-east-1")
   memberTable = new MemberTableAccessor()
   await memberCredentials.clear()
   await memberTable.clear()

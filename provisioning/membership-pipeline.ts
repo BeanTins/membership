@@ -3,8 +3,10 @@ import { App, Fn } from '@aws-cdk/core'
 import { ExportType, SCM } from './pipeline-builder/pipeline-stack'
 import { PipelineBuilder } from "./pipeline-builder/pipeline-builder"
 import { MembershipFactory} from "./membership-factory"
+import { StageParameters } from "../infrastructure/stage-parameters"
 
 const memberTableArn = Fn.importValue("MemberTableArntest")
+const userPoolArn = await new StageParameters("us-east-1").retrieveFromStage("UserPoolArn", "test")
 
 const membershipFactory = new MembershipFactory()
 
@@ -28,9 +30,11 @@ pipeline.withAcceptanceStage(
     exposingEnvVars: true,
     withPermissionToAccess: [
       {resource: memberTableArn, withAllowableOperations: ["dynamodb:*"]},
-      {resource: "*", withAllowableOperations: ["ssm:GetParameter"]}]
+      {resource: "*", withAllowableOperations: ["ssm:GetParameter"]},
+      {resource: userPoolArn, withAllowableOperations: ["cognito-idp:*"]}]
   }
 )
+
 pipeline.withProductionStage(
   {
     manualApproval: true,

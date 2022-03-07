@@ -1,5 +1,5 @@
 
-import {resolveOutput} from "../../infrastructure/output-resolver"
+import {StageParameters} from "../../../../infrastructure/stage-parameters"
 import CognitoIdentityServiceProvider from "aws-sdk/clients/cognitoidentityserviceprovider"
 import AWS from "aws-sdk"
 import logger from "./component-test-logger"
@@ -8,41 +8,20 @@ export class MemberCredentialsAccessor {
   private userPoolId: string
   private userPoolClientId: string
   private client: CognitoIdentityServiceProvider
+  private stageParameters: StageParameters
 
-  async retrieveStageParameter(name: string): Promise<string>
+  constructor(region: string)
   {
-    let ssm = new AWS.SSM({region: 'us-east-1'})
-
-    const parameterName = this.buildStageParameterName(name)
-    var options = {
-      Name: parameterName,
-      WithDecryption: false
-    }
-
-    logger.verbose("retrieving parameter " + parameterName)
-
-    const result = await ssm.getParameter(options).promise()
-
-    logger.verbose(parameterName + " value is " + result.Parameter!.Value!)
-    return result.Parameter!.Value!
-  }
-
-  buildStageParameterName(name: string): string
-  {
-    return name + "_" + this.getStage()
-  }
-
-  constructor()
-  {
-    AWS.config.update({region: "us-east-1"})
+    AWS.config.update({region: region})
     this.client = new CognitoIdentityServiceProvider()
+    this.stageParameters = new StageParameters(region)
   }
 
   async getUserPoolId(): Promise<string>
   {
     if (this.userPoolId == undefined)
     {
-      this.userPoolId = await this.retrieveStageParameter("userPoolId")
+      this.userPoolId = await this.stageParameters.retrieve("userPoolId")
     }
 
     return this.userPoolId
@@ -52,19 +31,10 @@ export class MemberCredentialsAccessor {
   {
     if (this.userPoolClientId == undefined)
     {
-      this.userPoolClientId = await this.retrieveStageParameter("userPoolClientId")
+      this.userPoolClientId = await this.stageParameters.retrieve("userPoolClientId")
     }
 
     return this.userPoolClientId
-  }
-
-  private getStage() {
-    let stage = process.env["PipelineStage"]
-
-    if (stage == undefined) {
-      stage = "dev"
-    }
-    return stage
   }
 
   async clear()
