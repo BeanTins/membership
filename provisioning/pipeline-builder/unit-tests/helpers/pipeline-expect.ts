@@ -4,7 +4,6 @@ import { Template, Match, Capture } from "@aws-cdk/assertions"
 export function expectCommandsToContain(stack: PipelineStack, commands: string[]) {
   const template = Template.fromStack(stack)
 
-  console.log(JSON.stringify(template))
   template.hasResourceProperties("AWS::CodeBuild::Project",
   {
     Source: Match.objectLike({
