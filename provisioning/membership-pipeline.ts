@@ -28,7 +28,7 @@ pipeline.withAcceptanceStage(
     exposingEnvVars: true,
     withPermissionToAccess: [
       {resource: memberTableArn, withAllowableOperations: ["dynamodb:*"]},
-      {resource: "*_test", withAllowableOperations: ["ssm:GetParameter"]}]
+      {resource: "*", withAllowableOperations: ["ssm:GetParameter"]}]
   }
 )
 pipeline.withProductionStage(
