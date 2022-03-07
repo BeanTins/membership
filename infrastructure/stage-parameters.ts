@@ -5,7 +5,6 @@ export class StageParameters {
 
   constructor(region: string){
     this.ssm = new AWS.SSM({region: region})
-    console.log(this.ssm)
   }
 
   async retrieve(name: string): Promise<string>
@@ -28,7 +27,8 @@ export class StageParameters {
     }
     catch (error)
     {
-      console.log(error)
+      console.error(options)
+      console.error(error)
       throw error
     }
 
