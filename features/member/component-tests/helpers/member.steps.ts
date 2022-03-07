@@ -12,11 +12,14 @@ let responseMessage: string
 let memberCredentials: MemberCredentialsAccessor
 let memberTable: MemberTableAccessor
 
+beforeAll(async()=> {
+  memberCredentials = new MemberCredentialsAccessor("us-east-1")
+  memberTable = new MemberTableAccessor()
+})
+
 beforeEach(async () => {
   name = null
   email = null
-  memberCredentials = new MemberCredentialsAccessor("us-east-1")
-  memberTable = new MemberTableAccessor()
   await memberCredentials.clear()
   await memberTable.clear()
 })
