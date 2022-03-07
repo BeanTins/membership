@@ -4,7 +4,6 @@
   "bin": {
     "membership": "bin/membership.js"
   },
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
