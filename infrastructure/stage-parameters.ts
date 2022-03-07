@@ -5,6 +5,7 @@ export class StageParameters {
 
   constructor(region: string){
     this.ssm = new AWS.SSM({region: region})
+    console.log(this.ssm)
   }
 
   async retrieve(name: string): Promise<string>
@@ -14,15 +15,24 @@ export class StageParameters {
 
   async retrieveFromStage(name: string, stage: string): Promise<string>
   {
+    let parameterValue = ""
     const parameterName = this.buildStageParameterName(name, stage)
     var options = {
       Name: parameterName,
       WithDecryption: false
     }
 
-    const result = await this.ssm.getParameter(options).promise()
+    try{
+      const result = await this.ssm.getParameter(options).promise()
+      parameterValue = result.Parameter!.Value!
+    }
+    catch (error)
+    {
+      console.log(error)
+      throw error
+    }
 
-    return result.Parameter!.Value!
+    return parameterValue
   }
 
   buildStageParameterName(name: string, stage: string): string
