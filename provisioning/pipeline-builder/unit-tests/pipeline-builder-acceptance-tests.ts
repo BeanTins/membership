@@ -5,7 +5,7 @@ import { Template, Match, Capture } from "@aws-cdk/assertions"
 import { TestStageFactory } from "./helpers/test-stage-factory"
 import { expectAndFindPipelineStage, 
   expectActionsToContainPartialMatch, 
-  expectCommandsToBe } from "./helpers/pipeline-expect"
+  expectCommandsToContain } from "./helpers/pipeline-expect"
 
 let stageFactory: TestStageFactory
 let pipelineBuilder: PipelineBuilder
@@ -77,6 +77,21 @@ test("Pipeline with source from github", () => {
                                      {Owner: "BeanTins", Repo: "membership", Branch: "main"})
 })
 
+test("Pipeline with stage export", () => {
+
+  pipelineBuilder.withAcceptanceStage(
+    {
+      extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
+      executingCommands: [],
+    }
+  )
+
+  const stack = pipelineBuilder.build()
+
+  expectCommandsToContain(stack, ["export PipelineStage=test"])
+
+})
+
 test("Pipeline with commands", () => {
 
   pipelineBuilder.withAcceptanceStage(
@@ -88,7 +103,7 @@ test("Pipeline with commands", () => {
 
   const stack = pipelineBuilder.build()
 
-  expectCommandsToBe(stack, ["npm run test:component"])
+  expectCommandsToContain(stack, ["npm run test:component"])
 
 })
 
@@ -199,7 +214,8 @@ test("Pipeline with endpoints as environment variables", () => {
       exposingEnvVars: true
     })
 
-  const template = Template.fromStack(pipelineBuilder.build())
+  const stack = pipelineBuilder.build()
+  const template = Template.fromStack(stack)
 
   template.hasResourceProperties("AWS::CodePipeline::Pipeline", {
     Stages: Match.arrayWith([
@@ -220,17 +236,7 @@ test("Pipeline with endpoints as environment variables", () => {
     ])
   })
   
-  template.hasResourceProperties("AWS::CodeBuild::Project", {
-    Source: Match.objectLike({
-      BuildSpec: Match.serializedJson(Match.objectLike({
-        phases: Match.objectLike({
-          build: Match.objectLike({ 
-            commands: ["export testFunction=$testFunction", "npm run test:component"] 
-          })
-        })
-      }))
-    })
-  }) 
+  expectCommandsToContain(stack, ["export testFunction=$testFunction"])
 })
 
 test("Pipeline with access to test resources", () => {

@@ -7,7 +7,6 @@ import { CfnOutput, Construct, StageProps, Stage } from "@aws-cdk/core"
 
 interface MembershipStageProps extends StageProps{
   stageName: string,
-  externalResources: any
 }
 
 export class MembershipStage extends Stage implements DeploymentStage{

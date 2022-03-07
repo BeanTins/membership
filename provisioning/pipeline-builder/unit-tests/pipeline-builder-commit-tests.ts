@@ -5,7 +5,7 @@ import { App } from "@aws-cdk/core"
 import { TestStageFactory } from "./helpers/test-stage-factory"
 import { expectAndFindPipelineStage, 
          expectActionsToContainPartialMatch, 
-         expectCommandsToBe } from "./helpers/pipeline-expect"
+         expectCommandsToContain } from "./helpers/pipeline-expect"
 
 let stageFactory: TestStageFactory
 let pipelineBuilder: PipelineBuilder
@@ -45,6 +45,17 @@ test("Pipeline with source from github", () => {
                                      {Owner: "BeanTins", Repo: "membership", Branch: "main"})
 })
 
+test("Pipeline with stage export", () => {
+  pipelineBuilder.withName("MembershipPipeline")
+  pipelineBuilder.withCommitStage({extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
+                                   executingCommands: []})
+
+  const stack = pipelineBuilder.build()
+
+  expectCommandsToContain(stack, ["export PipelineStage=commit"])
+
+})
+
 test("Pipeline with commands to build", () => {
   pipelineBuilder.withName("MembershipPipeline")
   pipelineBuilder.withCommitStage({extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
@@ -52,7 +63,7 @@ test("Pipeline with commands to build", () => {
 
   const stack = pipelineBuilder.build()
 
-  expectCommandsToBe(stack, ["npm ci"])
+  expectCommandsToContain(stack, ["npm ci"])
 })
 
 test("Pipeline with unit test reports", () => {

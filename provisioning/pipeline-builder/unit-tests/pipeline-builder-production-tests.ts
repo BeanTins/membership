@@ -3,7 +3,8 @@ import { PipelineBuilder } from "../pipeline-builder"
 import { App } from "@aws-cdk/core"
 import { TestStageFactory } from "./helpers/test-stage-factory"
 import { expectAndFindPipelineStage, 
-  expectActionsToContainPartialMatch} from "./helpers/pipeline-expect"
+  expectActionsToContainPartialMatch,
+  expectCommandsToContain} from "./helpers/pipeline-expect"
 
 let stageFactory: TestStageFactory
 let pipelineBuilder: PipelineBuilder
@@ -48,3 +49,4 @@ test("Pipeline with deployment", () => {
 
   expect(stageFactory.createdStacks[1]).toEqual("Production")
 })
+

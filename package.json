@@ -14,7 +14,7 @@
     "deploy:credentials": "npx cdk deploy MemberCredentialsDev --outputs-file memberCredentialsDevDeploy_outputs.json --app \"npx ts-node --prefer-ts-exts provisioning/member-credentials-dev.ts\"",
     "deploy:credentials:test": "npx cdk deploy MemberCredentialsTest --outputs-file memberCredentialsTestDeploy_outputs.json --app \"npx ts-node --prefer-ts-exts provisioning/member-credentials-test.ts\"",
     "deploy:credentials:prod": "npx cdk deploy MemberCredentialsProd --outputs-file memberCredentialsProdDeploy_outputs.json --app \"npx ts-node --prefer-ts-exts provisioning/member-credentials-prod.ts\"",
-    "deploy:pipeline": "npx cdk deploy PipelineStack/*/* --app \"npx ts-node --prefer-ts-exts provisioning/membership-pipeline.ts\"",
+    "deploy:pipeline": "npx cdk deploy PipelineStack --app \"npx ts-node --prefer-ts-exts provisioning/membership-pipeline.ts\"",
     "deploy": "npx cdk deploy MembershipDevStage/* --outputs-file awsDeploy_outputs.json --app \"npx ts-node --prefer-ts-exts provisioning/membership-dev.ts\"",
     "synth": "npx cdk synth --app \"npx ts-node --prefer-ts-exts provisioning/membership-dev.ts\"",
     "synth:pipeline": "npx cdk synth --app \"npx ts-node --prefer-ts-exts provisioning/membership-pipeline.ts\""

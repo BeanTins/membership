@@ -16,7 +16,7 @@ export class MemberCredentials extends Stack {
 
     const userPool = this.buildUserPool(id, props.stageName)
   
-    const client = this.buildUserPoolClient(userPool)
+    const client = this.buildUserPoolClient(userPool, props.stageName)
   }
 
   private buildUserPool(id: string, stageName: string) {
@@ -41,23 +41,26 @@ export class MemberCredentials extends Stack {
       removalPolicy: RemovalPolicy.DESTROY,
     })
 
-    new CfnOutput(this, 'userPoolId', {
-      value: userPool.userPoolId,
-    })
-
-    new StringParameter(this, "userPoolId_" + stageName, {
-      parameterName: "userPoolId_" + stageName,
-      stringValue: userPool.userPoolId,
-      description: "the member credentials Id for stage environment " + stageName,
-      type: ParameterType.STRING,
-      tier: ParameterTier.STANDARD,
-      allowedPattern: ".*",
-    })
+    this.buildParameter("userPoolId_" + stageName, 
+                        "the member credentials Id for stage environment " + stageName,
+                        userPool.userPoolId)
 
     return userPool
   }
 
-  private buildUserPoolClient(userPool: UserPool) {
+  private buildParameter(name: string, description: string, value: string) {
+
+    return new StringParameter(this, name, {
+      parameterName: name,
+      stringValue: value,
+      description: description,
+      type: ParameterType.STRING,
+      tier: ParameterTier.STANDARD,
+      allowedPattern: ".*",
+    })
+  }
+
+  private buildUserPoolClient(userPool: UserPool, stageName: string) {
     const standardCognitoAttributes = {
       email: true,
       emailVerified: true,
@@ -89,9 +92,9 @@ export class MemberCredentials extends Stack {
       writeAttributes: clientWriteAttributes,
     })
   
-    new CfnOutput(this, 'userPoolClientId', {
-      value: userPoolClient.userPoolClientId,
-    })
+    this.buildParameter("userPoolClientId_" + stageName, 
+    "the member credentials client Id for stage environment " + stageName,
+    userPoolClient.userPoolClientId)
 
     return userPoolClient
   }

@@ -5,23 +5,72 @@ import AWS from "aws-sdk"
 import logger from "./component-test-logger"
 
 export class MemberCredentialsAccessor {
-  
-  private client: CognitoIdentityServiceProvider
   private userPoolId: string
-  private clientId: string
+  private userPoolClientId: string
+  private client: CognitoIdentityServiceProvider
+
+  async retrieveStageParameter(name: string): Promise<string>
+  {
+    let ssm = new AWS.SSM({region: 'us-east-1'})
+
+    const parameterName = this.buildStageParameterName(name)
+    var options = {
+      Name: parameterName,
+      WithDecryption: false
+    }
+
+    logger.verbose("retrieving parameter " + parameterName)
+
+    const result = await ssm.getParameter(options).promise()
+
+    logger.verbose(parameterName + " value is " + result.Parameter!.Value!)
+    return result.Parameter!.Value!
+  }
+
+  buildStageParameterName(name: string): string
+  {
+    return name + "_" + this.getStage()
+  }
 
   constructor()
   {
     AWS.config.update({region: "us-east-1"})
     this.client = new CognitoIdentityServiceProvider()
-    this.userPoolId = resolveOutput("MemberCredentialsDev", "userPoolId")
-    this.clientId = resolveOutput("MemberCredentialsDev", "userPoolClientId")
+  }
+
+  async getUserPoolId(): Promise<string>
+  {
+    if (this.userPoolId == undefined)
+    {
+      this.userPoolId = await this.retrieveStageParameter("userPoolId")
+    }
+
+    return this.userPoolId
+  }
+
+  async getUserPoolClientId(): Promise<string>
+  {
+    if (this.userPoolClientId == undefined)
+    {
+      this.userPoolClientId = await this.retrieveStageParameter("userPoolClientId")
+    }
+
+    return this.userPoolClientId
+  }
+
+  private getStage() {
+    let stage = process.env["PipelineStage"]
+
+    if (stage == undefined) {
+      stage = "dev"
+    }
+    return stage
   }
 
   async clear()
   {
     var listParams = {
-      "UserPoolId": this.userPoolId
+      "UserPoolId": await this.getUserPoolId()
    }
 
    try
@@ -43,7 +92,7 @@ export class MemberCredentialsAccessor {
   private async deleteMember(client: CognitoIdentityServiceProvider, username: string) {
     const params = {
       Username: username,
-      UserPoolId: this.userPoolId
+      UserPoolId: await this.getUserPoolId()
     }
 
     try {
@@ -61,7 +110,7 @@ export class MemberCredentialsAccessor {
     {
       var confirmSignupParams = {
         Username: email,
-        UserPoolId: this.userPoolId
+        UserPoolId: await this.getUserPoolId()
       }
       const response = await this.client.adminConfirmSignUp(confirmSignupParams).promise()
       logger.verbose("confirmUser response - " + JSON.stringify(response))
@@ -78,7 +127,7 @@ export class MemberCredentialsAccessor {
     try
     {
       var params = {
-        ClientId: this.clientId,
+        ClientId: await this.getUserPoolClientId(),
         Username: email,
         Password: password
       }

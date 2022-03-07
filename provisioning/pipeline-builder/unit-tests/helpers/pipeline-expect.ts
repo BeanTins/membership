@@ -1,9 +1,10 @@
 import { PipelineStack } from "../../pipeline-stack"
 import { Template, Match, Capture } from "@aws-cdk/assertions"
 
-export function expectCommandsToBe(stack: PipelineStack, commands: string[]) {
+export function expectCommandsToContain(stack: PipelineStack, commands: string[]) {
   const template = Template.fromStack(stack)
 
+  console.log(JSON.stringify(template))
   template.hasResourceProperties("AWS::CodeBuild::Project",
   {
     Source: Match.objectLike({
@@ -11,7 +12,7 @@ export function expectCommandsToBe(stack: PipelineStack, commands: string[]) {
         Match.objectLike({
           phases: Match.objectLike({
             build: Match.objectLike({ 
-              commands: commands 
+              commands: Match.arrayWith(commands)
             })
           })
         })

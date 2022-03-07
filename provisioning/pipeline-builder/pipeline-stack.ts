@@ -30,18 +30,10 @@ export interface ReportingProperties {
   readonly exportingTo?: ExportType
 }
 
-interface ExternalResources {
-  [key: string]: any;
-}
-
 export interface ExecutionStageProperties {
   readonly extractingSourceFrom: SourceCodeProperties
   readonly executingCommands: string[]
   readonly reporting?: ReportingProperties
-}
-
-export interface DeployStageProperties {
-  readonly withExternalResources?: ExternalResources
 }
 
 export interface ResourceAccess {
@@ -52,12 +44,12 @@ export interface ResourceAccess {
 export interface CommitStageProperties extends ExecutionStageProperties {
 }
 
-export interface AcceptanceStageProperties extends ExecutionStageProperties, DeployStageProperties{
+export interface AcceptanceStageProperties extends ExecutionStageProperties{
   readonly exposingEnvVars?: boolean
   readonly withPermissionToAccess?: ResourceAccess[]
 }
 
-export interface ProductionStageProperties extends DeployStageProperties{
+export interface ProductionStageProperties{
   readonly manualApproval?: boolean
 }
 
@@ -89,7 +81,7 @@ export class PipelineStack extends Stack {
 
     if (props.acceptanceStage != undefined){
 
-      const acceptanceDeploymentStage = this.stageFactory.create(this, "AcceptanceTest", "test", props.acceptanceStage.withExternalResources)
+      const acceptanceDeploymentStage = this.stageFactory.create(this, "AcceptanceTest", "test")
     
       const buildStep = this.buildAcceptanceStageStep(props.acceptanceStage, acceptanceDeploymentStage)
 
@@ -99,12 +91,14 @@ export class PipelineStack extends Stack {
     if (props.productionStage != undefined){
       let stepSetup: any = {}
  
-      const productionDeploymentStage = this.stageFactory.create(this, "Production", "prod", props.productionStage.withExternalResources)
+      const productionDeploymentStage = this.stageFactory.create(this, "Production", "prod")
     
       if (props.productionStage.manualApproval)
       {
         stepSetup["pre"] = [new ManualApprovalStep('PromoteToProduction')]
       }
+
+      stepSetup["commands"] = [this.buildStageEnvVarCommand("prod")]
 
       pipeline.addStage(productionDeploymentStage,stepSetup)
     }
@@ -134,14 +128,15 @@ export class PipelineStack extends Stack {
       buildStepSetup["partialBuildSpec"] = this.buildReportingSpec(reportGroup.reportGroupArn, props.reporting)
     }
 
+    let commands: string[] = [this.buildStageEnvVarCommand("test"), ...props.executingCommands]
+
     if(props.exposingEnvVars){
       buildStepSetup["envFromCfnOutputs"] = deployedInfrastructure.envvars
 
-      let commands = this.buildEnvironmentVariableExportCommands(deployedInfrastructure.envvars)
-      commands = commands.concat(props.executingCommands)
-
-      buildStepSetup["commands"] = commands
+      commands = commands.concat(this.buildEnvironmentVariableExportCommands(deployedInfrastructure.envvars))
     }
+
+    buildStepSetup["commands"] = commands
 
     buildStepSetup["role"] = this.buildAcceptanceTestRole(props)
 
@@ -179,9 +174,11 @@ export class PipelineStack extends Stack {
 
   private buildCommitStageStep(commitStageProps: CommitStageProperties) {
     
+    const commands = [this.buildStageEnvVarCommand("commit"),...commitStageProps.executingCommands]
+
     let buildStepSetup: any = {
       input: this.buildSourceCode(commitStageProps),
-      commands: commitStageProps.executingCommands
+      commands: commands
     }
 
     let reportGroup: ReportGroup | undefined 
@@ -192,6 +189,10 @@ export class PipelineStack extends Stack {
     }
 
     return this.buildBuildStep("Commit", buildStepSetup, reportGroup)
+  }
+
+  private buildStageEnvVarCommand(stage: string) {
+    return "export PipelineStage=" + stage
   }
 
   private buildSourceCode(commitStageProps: CommitStageProperties) {
