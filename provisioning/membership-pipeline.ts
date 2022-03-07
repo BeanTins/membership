@@ -23,6 +23,8 @@ async function main(): Promise<void>
       extractingSourceFrom: { provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main" },
       executingCommands: ["npm ci", "npm run build", "npm run test:unit", "npx cdk synth"],
       reporting: {fromDirectory: "reports/unit-tests", withFiles: ["test-results.xml"]},
+      withPermissionToAccess: [
+        {resource: "*", withAllowableOperations: ["ssm:GetParameter"]}]
     })
   pipeline.withAcceptanceStage(
     {

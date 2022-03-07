@@ -34,6 +34,7 @@ export interface ExecutionStageProperties {
   readonly extractingSourceFrom: SourceCodeProperties
   readonly executingCommands: string[]
   readonly reporting?: ReportingProperties
+  readonly withPermissionToAccess?: ResourceAccess[]
 }
 
 export interface ResourceAccess {
@@ -46,7 +47,6 @@ export interface CommitStageProperties extends ExecutionStageProperties {
 
 export interface AcceptanceStageProperties extends ExecutionStageProperties{
   readonly exposingEnvVars?: boolean
-  readonly withPermissionToAccess?: ResourceAccess[]
 }
 
 export interface ProductionStageProperties{
@@ -138,19 +138,20 @@ export class PipelineStack extends Stack {
 
     buildStepSetup["commands"] = commands
 
-    buildStepSetup["role"] = this.buildAcceptanceTestRole(props)
+    buildStepSetup["role"] = this.buildStagePermissionsRole("AcceptanceTestExecutionRole", 
+                                                            props.withPermissionToAccess)
 
     return this.buildBuildStep("AcceptanceTest", buildStepSetup, reportGroup)
   }  
 
-  private buildAcceptanceTestRole(props: AcceptanceStageProperties) {
-    const role = new Role(this, "AcceptanceTestExecutionRole", {
+  private buildStagePermissionsRole(name: string, withPermissionToAccess: ResourceAccess[]|undefined) {
+    const role = new Role(this, name, {
       assumedBy: new ServicePrincipal("codebuild.amazonaws.com"),
-      roleName: "AcceptanceTestExecutionRole"
+      roleName: name
     })
 
-    if (props.withPermissionToAccess != undefined) {
-      for (const accessingResources of props.withPermissionToAccess) {
+    if (withPermissionToAccess != undefined) {
+      for (const accessingResources of withPermissionToAccess) {
 
         role.addToPolicy(new PolicyStatement(
           {
@@ -187,6 +188,9 @@ export class PipelineStack extends Stack {
       reportGroup = this.buildReportGroup(commitStageProps.reporting.exportingTo, "Commit")
       buildStepSetup["partialBuildSpec"] = this.buildReportingSpec(reportGroup.reportGroupArn, commitStageProps.reporting)
     }
+
+    buildStepSetup["role"] = this.buildStagePermissionsRole("CommitStageTestExecutionRole", 
+                                                           commitStageProps.withPermissionToAccess)
 
     return this.buildBuildStep("Commit", buildStepSetup, reportGroup)
   }
