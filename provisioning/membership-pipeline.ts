@@ -8,6 +8,7 @@ import { StageParameters } from "../infrastructure/stage-parameters"
 async function main(): Promise<void> 
 {
   const memberTableArn = Fn.importValue("MemberTableArntest")
+  const memberTableArnIndexes = memberTableArn + "\/index\/*"
   let userPoolArn = await new StageParameters("us-east-1").retrieveFromStage("userPoolArn", "test")
 
   const membershipFactory = new MembershipFactory()
@@ -34,6 +35,7 @@ async function main(): Promise<void>
       exposingEnvVars: true,
       withPermissionToAccess: [
         {resource: memberTableArn, withAllowableOperations: ["dynamodb:*"]},
+        {resource: memberTableArnIndexes, withAllowableOperations: ["dynamodb:*"]},
         {resource: "*", withAllowableOperations: ["ssm:GetParameter"]},
         {resource: userPoolArn, withAllowableOperations: ["cognito-idp:*"]}]
     }
