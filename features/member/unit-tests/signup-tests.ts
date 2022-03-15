@@ -44,26 +44,6 @@ test("signup successful for user that has already initiated signup", async () =>
   expect(result.body).toBe(JSON.stringify({message: "member created"}))
 })
 
-test("signup fails when command is undefined", async () => {
-
-    event = {} as APIGatewayEvent
-
-    const result:APIGatewayProxyResult  = await lambdaHandler(event, context)
-  
-    expect(result.statusCode).toBe(400)
-    expect(result.body).toBe(JSON.stringify({message: "no command specified for signup"}))
-})
-
-test("signup fails when name is undefined", async () => {
-
-  requestSignupOf(null, "bob@gmail.com")
-
-  const result:APIGatewayProxyResult  = await lambdaHandler(event, context)
-
-  expect(result.statusCode).toBe(400)
-  expect(result.body).toBe(JSON.stringify({message: "no name specified for signup"}))
-})
-
 function veryLongName(){
   return "bob".padStart(257, "b")
 }
@@ -78,16 +58,6 @@ test.each([["a", "name too short: \"a\""],
 
   expect(result.statusCode).toBe(400)
   expect(result.body).toBe(JSON.stringify({message: errorMessage}))
-})
-
-test("signup fails when email is undefined", async () => {
-
-  requestSignupOf("bob", null)
-
-  const result:APIGatewayProxyResult  = await lambdaHandler(event, context)
-
-  expect(result.statusCode).toBe(400)
-  expect(result.body).toBe(JSON.stringify({message: "no email specified for signup"}))
 })
 
 test.each([["@gmail.com", "invalid email: @gmail.com"],

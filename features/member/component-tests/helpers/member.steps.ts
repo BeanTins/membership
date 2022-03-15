@@ -7,6 +7,7 @@ import {MemberCredentialsAccessor} from "./member-credentials-accessor"
 
 let name: string | null
 let email: string | null
+let failureResponse: string | undefined
 let responseCode: number
 let responseMessage: string
 let memberCredentials: MemberCredentialsAccessor
@@ -31,8 +32,15 @@ export const MemberSteps: StepDefinitions = ({ given, and, when, then }) => {
     email = generateEmailFromName(enteredName)
   })
 
+  given(/a member (.+) with missing details$/, async (enteredName: string) => {
+    name = enteredName
+    failureResponse = "Invalid request body"
+  })
+
   given(/a member (.+) with invalid details$/, async (enteredName: string) => {
     name = enteredName
+    email = generateInvalidEmailFromName(enteredName)
+    failureResponse = "invalid email: " + email
   })
 
   given(/an existing member (.+)$/, async (enteredName: string) => {
@@ -74,14 +82,18 @@ export const MemberSteps: StepDefinitions = ({ given, and, when, then }) => {
     expect(responseMessage).toBe("member already signed up")
   })
 
-
   then("they become an active member", async() => {
     await expect(memberTable.isActiveMember(email!)).resolves.toBe(true)
   })
 
-  then("their signup request is rejected as it was invalid", () => {
+  then("they are an inactive member", async() => {
+    await expect(memberTable.isActiveMember(email!)).resolves.not.toBe(true)
+  })
+
+  then("their signup request is rejected", () => {
     expect(responseCode).toBe(400)
-    expect(responseMessage).toBe("no email specified for signup")
+    
+    expect(responseMessage).toBe(failureResponse)
   })
 
   then("they are not signed up", () => {
@@ -91,5 +103,9 @@ export const MemberSteps: StepDefinitions = ({ given, and, when, then }) => {
 
 function generateEmailFromName(enteredName: string): string {
   return enteredName.replace(/ /g, ".") + "@gmail.com"
+}
+
+function generateInvalidEmailFromName(enteredName: string): string {
+  return enteredName.replace(/ /g, ".") + "@gmail"
 }
 

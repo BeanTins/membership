@@ -24,6 +24,7 @@ export class MembershipStage extends Stage implements DeploymentStage{
     this.parameters = new StageParameters(this, "StageParameters", {stageName: props.stageName})
     this.memberTable = new MemberTable(this, "Members", {postfixIdentifier: props.stageName})
 
+    
     this.signup = new SignupStack(this, "MemberSignup", {memberTable: this.memberTable.name, stageName: props.stageName})
     this.verify = new VerifyStack(this, "MemberVerify", 
     {memberTable: this.memberTable.name,
