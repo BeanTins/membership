@@ -1,4 +1,3 @@
-import {resolveOutput} from "../../infrastructure/output-resolver"
 import {DocumentClient} from "aws-sdk/clients/dynamodb"
 import {Status} from "../../domain/member"
 import logger from "./component-test-logger"
@@ -8,15 +7,14 @@ export class MemberTableAccessor {
   private dynamoDB: DocumentClient
   private memberTableName: string
 
-  constructor()
+  constructor(region: string)
   {
-    this.dynamoDB = new DocumentClient({region: "us-east-1"})
-    this.memberTableName = resolveOutput("MembershipDevStage-Members", "MemberTable")
+    this.dynamoDB = new DocumentClient({region: region})
+    this.memberTableName = process.env.memberTable!
   }
 
   async clear()
   {
-    
     const queryTableName = {
         TableName: this.memberTableName
     }
@@ -72,6 +70,7 @@ export class MemberTableAccessor {
     let activeMember = false
     try{
         let result = await this.dynamoDB.query(params).promise()
+        logger.verbose("active member querey result - " + result)
         if((result.Count != null) && result.Count > 0)
         {
           const item = result.Items![0]

@@ -8,9 +8,20 @@ export enum Status {
   Active = "active"
 }
 
+export interface DomainEvent{}
+
 export class Entity{
   
   readonly id: string
+  private domainEvents: Array<DomainEvent>
+
+  addEvent(event: DomainEvent){
+    this.domainEvents.push(event)
+  }
+
+  get events() {
+    return this.domainEvents;
+  }
 
   constructor (id: string|null){
     if (id == null)
@@ -21,6 +32,7 @@ export class Entity{
     {
       this.id = id
     }
+    this.domainEvents = new Array()
   }
 }
 
@@ -63,5 +75,16 @@ export class Member extends Entity {
     this.status = Status.Active
   }
 }
+
+export class MemberActivatedEvent {
+  id: string
+  email: string
+
+  constructor(email: string, id: string){
+    this.email = email
+    this.id = id
+  }
+}
+
 
 

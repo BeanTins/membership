@@ -1,4 +1,4 @@
-import { SCM, PipelineStack } from "../pipeline-stack"
+import { SCM } from "../pipeline-stack"
 import { PipelineBuilder } from "../pipeline-builder"
 import { Template, Match, Capture } from "@aws-cdk/assertions"
 import { App } from "@aws-cdk/core"
@@ -129,29 +129,6 @@ test("Pipeline with report creation permissions", () => {
         ])
       })
     })
-})
-
-test("Pipeline with access to test resources", () => {
-
-  pipelineBuilder.withName("MembershipPipeline")
-  pipelineBuilder.withCommitStage(
-    {
-      extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
-      executingCommands: ["npm run test:component"],
-      withPermissionToAccess: [{resource: "TestResource", withAllowableOperations: ["dynamodb:*"]}]
-    }
-  )
-
-  const template = Template.fromStack(pipelineBuilder.build())
-
-  template.hasResourceProperties("AWS::IAM::Policy", {
-    PolicyDocument: Match.objectLike({
-      Statement: Match.arrayWith([Match.objectLike({
-        Action: "dynamodb:*",
-        Resource: "TestResource"
-      })])
-    })
-  })
 })
 
 function pipelineWithNameAndCommitStagePopulated() {

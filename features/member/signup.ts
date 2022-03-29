@@ -14,11 +14,10 @@ export const specBuilder = function() {
   const specBuilder = new OpenAPISpecBuilder("3.0.0")
 
   specBuilder.describedAs("member signup", "allows signup of a new member to the BeanTins service", "1.9.0")
-  const endpoint = specBuilder.withEndpoint("/member/signup", HttpMethod.Post)
 
+  const endpoint = specBuilder.withEndpoint("/member/signup", HttpMethod.Post)
   endpoint.withRequestBodyStringProperty({name: "email", required: true})
   endpoint.withRequestBodyStringProperty({name: "name", minLength: 2, maxLength: 256, required: true})
-
   endpoint.withResponse("201", "member created")
   endpoint.withResponse("400", "member not created due to invalid request")
   endpoint.withResponse("409", "member already signed up")

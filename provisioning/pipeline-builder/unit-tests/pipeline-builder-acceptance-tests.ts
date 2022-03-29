@@ -1,6 +1,6 @@
 import { SCM, ExportType } from "../pipeline-stack"
 import { PipelineBuilder } from "../pipeline-builder"
-import { App } from "@aws-cdk/core"
+import { App, RemovalPolicy } from "@aws-cdk/core"
 import { Template, Match, Capture } from "@aws-cdk/assertions"
 import { TestStageFactory } from "./helpers/test-stage-factory"
 import { expectAndFindPipelineStage, 
@@ -261,6 +261,24 @@ test("Pipeline with access to test resources", () => {
   })
 })
 
+test("Pipeline with custom definition", () => {
+
+  pipelineBuilder.withAcceptanceStage(
+    {
+      extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
+      executingCommands: ["npm run test:component"],
+      withCustomDefinitions: {bucketName: "newbucket"}
+    }
+  )
+
+  pipelineBuilder.build()
+
+  const template = Template.fromStack(stageFactory.stages[0].testStack)
+
+  template.hasResourceProperties("AWS::S3::Bucket", {
+    BucketName: "newbucket"
+  })
+})
 
 
 

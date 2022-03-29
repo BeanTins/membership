@@ -1,4 +1,4 @@
-import {Table, AttributeType, ProjectionType} from "@aws-cdk/aws-dynamodb"
+import {Table, AttributeType, ProjectionType, StreamViewType} from "@aws-cdk/aws-dynamodb"
 import {Construct, StackProps, RemovalPolicy, CfnOutput } from "@aws-cdk/core"
 import {IPrincipal} from "@aws-cdk/aws-iam"
 import {EnvvarsStack} from "./envvars-stack" 
@@ -8,12 +8,13 @@ interface MemberTableProps extends StackProps {
 }
 
 export class MemberTable extends EnvvarsStack {
-  private readonly memberTable: Table
+  public readonly memberTable: Table
   constructor(scope: Construct, id: string, props?: MemberTableProps) {
     super(scope, id, props)
     this.memberTable = new Table(this, "Table", {
       partitionKey: { name: "id", type: AttributeType.STRING },
       removalPolicy: RemovalPolicy.DESTROY,
+      stream: StreamViewType.NEW_AND_OLD_IMAGES,
     })
 
     this.memberTable.addGlobalSecondaryIndex({
@@ -23,6 +24,8 @@ export class MemberTable extends EnvvarsStack {
       writeCapacity: 1,
       projectionType: ProjectionType.ALL,
     })
+
+    
 
     this.addEnvvar("MemberTable", this.memberTable.tableName)
     

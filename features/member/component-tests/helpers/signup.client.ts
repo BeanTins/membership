@@ -1,6 +1,6 @@
 import got from "got"
 import {Logger} from "winston"
-import {resolveOutput} from "../../infrastructure/output-resolver"
+import {resolveOutput} from "./output-resolver"
 
 export async function signupMember(name: string | null, email: string | null, logger: Logger)
 {
@@ -16,7 +16,7 @@ export async function signupMember(name: string | null, email: string | null, lo
     }
 
     try{
-        const url = resolveOutput("MembershipDevStage-MemberSignup", "MemberSignupEndpoint")
+        const url = resolveOutput("MemberSignupEndpoint")
 
         logger.verbose("member signup url - " + url)
 

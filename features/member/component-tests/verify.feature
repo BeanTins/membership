@@ -12,4 +12,3 @@ Given a new prospective member Jock the Crow
 When they signup 
 And they verify
 Then they become an active member
-

@@ -1,10 +1,10 @@
 import { SCM } from "../pipeline-stack"
 import { PipelineBuilder } from "../pipeline-builder"
 import { App } from "@aws-cdk/core"
+import { Template, Match } from "@aws-cdk/assertions"
 import { TestStageFactory } from "./helpers/test-stage-factory"
 import { expectAndFindPipelineStage, 
-  expectActionsToContainPartialMatch,
-  expectCommandsToContain} from "./helpers/pipeline-expect"
+  expectActionsToContainPartialMatch} from "./helpers/pipeline-expect"
 
 let stageFactory: TestStageFactory
 let pipelineBuilder: PipelineBuilder
@@ -49,4 +49,25 @@ test("Pipeline with deployment", () => {
 
   expect(stageFactory.createdStacks[1]).toEqual("Production")
 })
+
+test("Pipeline with access to resources", () => {
+
+  pipelineBuilder.withProductionStage(
+    {
+      withPermissionToAccess: [{resource: "ProdResource", withAllowableOperations: ["dynamodb:*"]}]
+    }
+  )
+
+  const template = Template.fromStack(pipelineBuilder.build())
+
+  template.hasResourceProperties("AWS::IAM::Policy", {
+    PolicyDocument: Match.objectLike({
+      Statement: Match.arrayWith([Match.objectLike({
+        Action: "dynamodb:*",
+        Resource: "ProdResource"
+      })])
+    })
+  })
+})
+
 

@@ -1,46 +1,22 @@
 
-import {StageParameters} from "../../../../infrastructure/stage-parameters"
 import CognitoIdentityServiceProvider from "aws-sdk/clients/cognitoidentityserviceprovider"
 import AWS from "aws-sdk"
 import logger from "./component-test-logger"
 
 export class MemberCredentialsAccessor {
-  private userPoolId: string
-  private userPoolClientId: string
   private client: CognitoIdentityServiceProvider
-  private stageParameters: StageParameters
 
   constructor(region: string)
   {
     AWS.config.update({region: region})
     this.client = new CognitoIdentityServiceProvider()
-    this.stageParameters = new StageParameters(region)
-  }
 
-  async getUserPoolId(): Promise<string>
-  {
-    if (this.userPoolId == undefined)
-    {
-      this.userPoolId = await this.stageParameters.retrieve("userPoolId")
-    }
-
-    return this.userPoolId
-  }
-
-  async getUserPoolClientId(): Promise<string>
-  {
-    if (this.userPoolClientId == undefined)
-    {
-      this.userPoolClientId = await this.stageParameters.retrieve("userPoolClientId")
-    }
-
-    return this.userPoolClientId
   }
 
   async clear()
   {
     var listParams = {
-      "UserPoolId": await this.getUserPoolId()
+      "UserPoolId": process.env.userPoolId!
    }
 
    try
@@ -62,7 +38,7 @@ export class MemberCredentialsAccessor {
   private async deleteMember(client: CognitoIdentityServiceProvider, username: string) {
     const params = {
       Username: username,
-      UserPoolId: await this.getUserPoolId()
+      UserPoolId: process.env.userPoolId!
     }
 
     try {
@@ -80,8 +56,9 @@ export class MemberCredentialsAccessor {
     {
       var confirmSignupParams = {
         Username: email,
-        UserPoolId: await this.getUserPoolId()
+        UserPoolId: process.env.userPoolId!
       }
+      logger.verbose(confirmSignupParams)
       const response = await this.client.adminConfirmSignUp(confirmSignupParams).promise()
       logger.verbose("confirmUser response - " + JSON.stringify(response))
     }
@@ -97,7 +74,7 @@ export class MemberCredentialsAccessor {
     try
     {
       var params = {
-        ClientId: await this.getUserPoolClientId(),
+        ClientId: process.env.userPoolClientId!,
         Username: email,
         Password: password
       }

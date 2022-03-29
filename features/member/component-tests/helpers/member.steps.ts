@@ -4,6 +4,9 @@ import { StepDefinitions } from "jest-cucumber"
 import { signupMember } from "./signup.client"
 import {MemberTableAccessor} from "./member-table-accessor"
 import {MemberCredentialsAccessor} from "./member-credentials-accessor"
+import { EventListenerQueueClient, EventResponse } from "./event-listener-queue-client"
+import { MemberActivatedEvent } from "../../domain/member"
+import {resolveOutput} from "./output-resolver"
 
 let name: string | null
 let email: string | null
@@ -12,10 +15,31 @@ let responseCode: number
 let responseMessage: string
 let memberCredentials: MemberCredentialsAccessor
 let memberTable: MemberTableAccessor
+let listenerQueue: EventListenerQueueClient
+
+function getStage()
+{
+  let stage:string
+
+  if (process.env.PipelineStage != undefined)
+  {
+    stage = process.env.PipelineStage 
+  }
+  else 
+  {
+    stage = "dev"
+  }
+
+  return stage
+}
 
 beforeAll(async()=> {
+
+  configureProvisionedResources()
+
   memberCredentials = new MemberCredentialsAccessor("us-east-1")
-  memberTable = new MemberTableAccessor()
+  memberTable = new MemberTableAccessor("us-east-1")
+  listenerQueue = new EventListenerQueueClient("us-east-1")
 })
 
 beforeEach(async () => {
@@ -83,7 +107,13 @@ export const MemberSteps: StepDefinitions = ({ given, and, when, then }) => {
   })
 
   then("they become an active member", async() => {
-    await expect(memberTable.isActiveMember(email!)).resolves.toBe(true)
+
+    const activeMemberEmail = memberTable.isActiveMember(email!)
+    const memberActivatedEvent = retrievePostedMemberActivatedEvent()
+
+    await expect(activeMemberEmail).resolves.toBe(true)
+
+    expect((await memberActivatedEvent).email).toBe(email)
   })
 
   then("they are an inactive member", async() => {
@@ -101,6 +131,36 @@ export const MemberSteps: StepDefinitions = ({ given, and, when, then }) => {
 
 }
 
+function configureProvisionedResources() {
+  if (process.env.testQueueName == undefined) {
+    process.env.testQueueName = resolveOutput("testListenerQueueNamedev")
+  }
+
+  if (process.env.memberTableName == undefined) {
+    process.env.memberTable = resolveOutput("MemberTable")
+  }
+
+  const userPoolName = "userPoolId" + getStage()
+
+  if (process.env[userPoolName] == undefined) {
+    process.env.userPoolId = resolveOutput(userPoolName)
+  }
+
+  else {
+    process.env.userPoolId = process.env[userPoolName]
+  }
+
+  const userPoolClientIdName = "userPoolClientId" + getStage()
+
+  if (process.env[userPoolClientIdName] == undefined) {
+    process.env.userPoolClientId = resolveOutput(userPoolClientIdName)
+  }
+
+  else {
+    process.env.userPoolClientId = process.env[userPoolClientIdName]
+  }
+}
+
 function generateEmailFromName(enteredName: string): string {
   return enteredName.replace(/ /g, ".") + "@gmail.com"
 }
@@ -108,4 +168,13 @@ function generateEmailFromName(enteredName: string): string {
 function generateInvalidEmailFromName(enteredName: string): string {
   return enteredName.replace(/ /g, ".") + "@gmail"
 }
+
+async function retrievePostedMemberActivatedEvent(): Promise<MemberActivatedEvent>
+{
+  let response: EventResponse|undefined = await listenerQueue.popEvent()
+
+  expect(response?.type).toBe("MemberActivatedEvent")
+  return response!.data as MemberActivatedEvent
+}
+
 

@@ -1,4 +1,4 @@
-import { Construct, Stack, RemovalPolicy, CfnOutput, Fn } from "@aws-cdk/core"
+import { Construct, Stack, RemovalPolicy, CfnOutput, Stage } from "@aws-cdk/core"
 import { CodePipeline, CodePipelineSource, CodeBuildStep, ManualApprovalStep } from "@aws-cdk/pipelines"
 import { ReportGroup, BuildSpec } from "@aws-cdk/aws-codebuild"
 import { Bucket } from "@aws-cdk/aws-s3"
@@ -34,7 +34,6 @@ export interface ExecutionStageProperties {
   readonly extractingSourceFrom: SourceCodeProperties
   readonly executingCommands: string[]
   readonly reporting?: ReportingProperties
-  readonly withPermissionToAccess?: ResourceAccess[]
 }
 
 export interface ResourceAccess {
@@ -42,14 +41,23 @@ export interface ResourceAccess {
   readonly withAllowableOperations: string[]
 }
 
+export interface CustomDefinitions {
+  readonly [name: string]: string
+}
+
+export interface DeploymentStageProperties {
+  readonly withCustomDefinitions?: CustomDefinitions
+  readonly withPermissionToAccess?: ResourceAccess[]
+}
+
 export interface CommitStageProperties extends ExecutionStageProperties {
 }
 
-export interface AcceptanceStageProperties extends ExecutionStageProperties{
+export interface AcceptanceStageProperties extends ExecutionStageProperties, DeploymentStageProperties{
   readonly exposingEnvVars?: boolean
 }
 
-export interface ProductionStageProperties{
+export interface ProductionStageProperties extends DeploymentStageProperties{
   readonly manualApproval?: boolean
 }
 
@@ -73,6 +81,7 @@ export class PipelineStack extends Stack {
     super(scope, id)
     this.stageFactory = stageFactory
     this.deferredReportGroupPermissionChanges = new Array()
+    this.deferredReportGroupPermissionChanges = new Array()
 
     const pipeline = new CodePipeline(this, "Pipeline", {
       pipelineName: props.name,
@@ -81,7 +90,7 @@ export class PipelineStack extends Stack {
 
     if (props.acceptanceStage != undefined){
 
-      const acceptanceDeploymentStage = this.stageFactory.create(this, "AcceptanceTest", "test")
+      const acceptanceDeploymentStage = this.stageFactory.create(this, "AcceptanceTest", "test", props.acceptanceStage.withCustomDefinitions)
     
       const buildStep = this.buildAcceptanceStageStep(props.acceptanceStage, acceptanceDeploymentStage)
 
@@ -91,7 +100,7 @@ export class PipelineStack extends Stack {
     if (props.productionStage != undefined){
       let stepSetup: any = {}
  
-      const productionDeploymentStage = this.stageFactory.create(this, "Production", "prod")
+      const productionDeploymentStage = this.stageFactory.create(this, "Production", "prod", props.productionStage.withCustomDefinitions)
     
       if (props.productionStage.manualApproval)
       {
@@ -99,6 +108,9 @@ export class PipelineStack extends Stack {
       }
 
       stepSetup["commands"] = [this.buildStageEnvVarCommand("prod")]
+
+      stepSetup["role"] = this.buildStagePermissionsRole("ProductionTestExecutionRole", 
+      props.productionStage.withPermissionToAccess)
 
       pipeline.addStage(productionDeploymentStage,stepSetup)
     }
@@ -188,9 +200,6 @@ export class PipelineStack extends Stack {
       reportGroup = this.buildReportGroup(commitStageProps.reporting.exportingTo, "Commit")
       buildStepSetup["partialBuildSpec"] = this.buildReportingSpec(reportGroup.reportGroupArn, commitStageProps.reporting)
     }
-
-    buildStepSetup["role"] = this.buildStagePermissionsRole("CommitStageTestExecutionRole", 
-                                                           commitStageProps.withPermissionToAccess)
 
     return this.buildBuildStep("Commit", buildStepSetup, reportGroup)
   }
