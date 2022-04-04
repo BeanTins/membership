@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-import { App, Fn } from "@aws-cdk/core"
+import { App, Fn } from "aws-cdk-lib"
 import { ExportType, SCM } from "./pipeline-builder/pipeline-stack"
 import { PipelineBuilder } from "./pipeline-builder/pipeline-builder"
 import { MembershipFactory} from "./membership-factory"
 import { StageParameters } from "../infrastructure/stage-parameters"
-import { MemberCredentials, StoreType} from "./member-credentials"
+import { MemberCredentials, StoreType} from "../../credentials/infrastructure/member-credentials"
 import { EventListenerQueueStack } from "../features/member/component-tests/helpers/event-listener-queue-stack"
 
 interface StageConfiguration
@@ -32,13 +32,15 @@ async function main(): Promise<void>
 
   pipeline.withCommitStage(
     {
-      extractingSourceFrom: { provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main" },
-      executingCommands: ["npm ci", "npm run build", "npm run test:unit", "npx cdk synth"],
+      extractingSourceFrom: [
+        { provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main" },
+        { provider: SCM.GitHub, owner: "BeanTins", repository: "credentials", branch: "main" }],
+      executingCommands: ["npm ci", "ls -R", "npm run build", "npm run test:unit", "npx cdk synth"],
       reporting: {fromDirectory: "reports/unit-tests", withFiles: ["test-results.xml"]}
     })
   pipeline.withAcceptanceStage(
     {
-      extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
+      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"}],
       executingCommands: ["npm ci", 
       "export testQueueName=" + Fn.importValue("testListenerQueueNametest"),
       "npm run test:component"],

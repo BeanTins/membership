@@ -1,5 +1,5 @@
-import {IPrincipal} from "@aws-cdk/aws-iam"
-import {Stage, CfnOutput} from "@aws-cdk/core"
+import {IPrincipal} from "aws-cdk-lib/aws-iam"
+import {Stage, CfnOutput} from "aws-cdk-lib"
 
 export interface DeploymentStage extends Stage
 {

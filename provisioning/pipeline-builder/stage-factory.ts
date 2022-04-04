@@ -1,4 +1,4 @@
-import { Construct } from "@aws-cdk/core"
+import { Construct } from "constructs"
 import { DeploymentStage } from "./deployment-stage"
 import { CustomDefinitions } from "./pipeline-stack"
 

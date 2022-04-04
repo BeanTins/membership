@@ -1,7 +1,8 @@
-import {Stack, StackProps, Construct, CfnOutput, Duration} from "@aws-cdk/core"
-import {EventBus, Rule } from "@aws-cdk/aws-events"
-import {SqsQueue} from "@aws-cdk/aws-events-targets"
-import {Queue} from "@aws-cdk/aws-sqs"
+import {Stack, StackProps, CfnOutput} from "aws-cdk-lib"
+import { Construct } from "constructs"
+import {EventBus, Rule } from "aws-cdk-lib/aws-events"
+import {SqsQueue} from "aws-cdk-lib/aws-events-targets"
+import {Queue} from "aws-cdk-lib/aws-sqs"
 
 interface EventBusProps extends StackProps {
   stageName: string

@@ -1,6 +1,7 @@
-import {Table, AttributeType, ProjectionType, StreamViewType} from "@aws-cdk/aws-dynamodb"
-import {Construct, StackProps, RemovalPolicy, CfnOutput } from "@aws-cdk/core"
-import {IPrincipal} from "@aws-cdk/aws-iam"
+import {Table, AttributeType, ProjectionType, StreamViewType} from "aws-cdk-lib/aws-dynamodb"
+import { StackProps, RemovalPolicy, CfnOutput } from "aws-cdk-lib"
+import { Construct } from "constructs"
+import {IPrincipal} from "aws-cdk-lib/aws-iam"
 import {EnvvarsStack} from "./envvars-stack" 
 
 interface MemberTableProps extends StackProps {

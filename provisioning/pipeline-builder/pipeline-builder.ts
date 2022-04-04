@@ -1,4 +1,4 @@
-import { App } from "@aws-cdk/core"
+import { App } from "aws-cdk-lib/core"
 import { PipelineStack, CommitStageProperties, AcceptanceStageProperties, ProductionStageProperties } from "./pipeline-stack"
 import { StageFactory } from "./stage-factory"
 

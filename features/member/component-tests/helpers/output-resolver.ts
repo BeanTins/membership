@@ -1,6 +1,5 @@
 import {readFileSync, readdirSync} from "fs"
 import * as path from "path"
-import logger from "../../infrastructure/logger"
 
 export function resolveOutput(targetOutputName: string)
 {
@@ -26,7 +25,6 @@ export function resolveOutput(targetOutputName: string)
                 }
             }
         }
-        logger.verbose("output - " + output)
     }
 
     if (output == undefined)

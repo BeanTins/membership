@@ -1,7 +1,8 @@
-import { Stage, Construct, Stack, CfnOutput } from "@aws-cdk/core"
+import { Stage, Stack, CfnOutput } from "aws-cdk-lib"
+import { Construct } from "constructs"
 import { StageFactory } from "../../stage-factory"
 import { DeploymentStage } from "../../deployment-stage"
-import { Bucket } from "@aws-cdk/aws-s3"
+import { Bucket } from "aws-cdk-lib/aws-s3"
 import { CustomDefinitions } from "../../pipeline-stack"
 
 export class TestStageFactory implements StageFactory {

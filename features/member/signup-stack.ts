@@ -1,5 +1,6 @@
 
-import { Construct, StackProps } from "@aws-cdk/core"
+import { StackProps } from "aws-cdk-lib"
+import { Construct } from "constructs"
 import * as path from "path"
 import { specBuilder} from "./signup"
 import { LambdaEndpoint } from "../../provisioning/lambda-endpoint"

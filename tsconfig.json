@@ -28,6 +28,9 @@
       "./node_modules/@types"
     ]
   },
+  "references":  [
+    { "path": "../credentials" }
+  ],
   "exclude": [
     "node_modules",
     "cdk.out",

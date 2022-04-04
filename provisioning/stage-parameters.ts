@@ -1,5 +1,6 @@
-import {Stack, StackProps, Construct} from "@aws-cdk/core"
-import {StringParameter} from "@aws-cdk/aws-ssm"
+import {Stack, StackProps } from "aws-cdk-lib"
+import { Construct } from "constructs"
+import {StringParameter} from "aws-cdk-lib/aws-ssm"
 
 interface StageParametersProps extends StackProps {
   stageName: string;

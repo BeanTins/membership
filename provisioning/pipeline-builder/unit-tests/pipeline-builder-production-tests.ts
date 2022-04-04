@@ -1,7 +1,7 @@
 import { SCM } from "../pipeline-stack"
 import { PipelineBuilder } from "../pipeline-builder"
-import { App } from "@aws-cdk/core"
-import { Template, Match } from "@aws-cdk/assertions"
+import { App } from "aws-cdk-lib"
+import { Template, Match } from "aws-cdk-lib/assertions"
 import { TestStageFactory } from "./helpers/test-stage-factory"
 import { expectAndFindPipelineStage, 
   expectActionsToContainPartialMatch} from "./helpers/pipeline-expect"
@@ -17,12 +17,12 @@ beforeEach(() => {
   pipelineBuilder.withName("MembershipPipeline")
   pipelineBuilder.withCommitStage(
     {
-      extractingSourceFrom: { provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main" },
+      extractingSourceFrom: [{ provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main" }],
       executingCommands: []
     })
   pipelineBuilder.withAcceptanceStage(
     {
-      extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
+      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"}],
       executingCommands: ["npm run test:component"],
     }
   )

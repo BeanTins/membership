@@ -1,6 +1,5 @@
 import got from "got"
 import {Logger} from "winston"
-import {resolveOutput} from "./output-resolver"
 
 export async function signupMember(name: string | null, email: string | null, logger: Logger)
 {
@@ -16,13 +15,13 @@ export async function signupMember(name: string | null, email: string | null, lo
     }
 
     try{
-        const url = resolveOutput("MemberSignupEndpoint")
+        const url = process.env.signupMemberUrl
 
         logger.verbose("member signup url - " + url)
 
         logger.verbose("request body - " + JSON.stringify(requestBody))
 
-        responseBody = await got.post(url, {json: requestBody, throwHttpErrors: false})
+        responseBody = await got.post(url!, {json: requestBody, throwHttpErrors: false})
 
         logger.verbose("member signup response statusCode:" + 
                         responseBody.statusCode + 

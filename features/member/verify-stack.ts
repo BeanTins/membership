@@ -1,10 +1,11 @@
-import {UserPool} from "@aws-cdk/aws-cognito"
-import {Construct, Stack, StackProps, Duration } from "@aws-cdk/core"
-import { Function, Runtime } from "@aws-cdk/aws-lambda"
-import {AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId} from "@aws-cdk/custom-resources"
-import {NodejsFunction} from "@aws-cdk/aws-lambda-nodejs"
+import {UserPool} from "aws-cdk-lib/aws-cognito"
+import { Stack, StackProps, Duration } from "aws-cdk-lib"
+import { Construct } from "constructs"
+import { Function, Runtime } from "aws-cdk-lib/aws-lambda"
+import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId} from "aws-cdk-lib/custom-resources"
+import {NodejsFunction} from "aws-cdk-lib/aws-lambda-nodejs"
 import * as path from "path"
-import {ServicePrincipal} from "@aws-cdk/aws-iam"
+import {ServicePrincipal} from "aws-cdk-lib/aws-iam"
 
 interface VerifyStackProps extends StackProps {
   memberTable: string;

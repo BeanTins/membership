@@ -132,6 +132,11 @@ export const MemberSteps: StepDefinitions = ({ given, and, when, then }) => {
 }
 
 function configureProvisionedResources() {
+
+  if (process.env.signupMemberUrl == undefined) {
+    process.env.signupMemberUrl = resolveOutput("MemberSignupEndpoint")
+  }
+
   if (process.env.testQueueName == undefined) {
     process.env.testQueueName = resolveOutput("testListenerQueueNamedev")
   }

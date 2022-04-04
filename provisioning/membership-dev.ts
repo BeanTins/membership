@@ -1,8 +1,8 @@
 
 import "source-map-support/register"
-import {App, Fn} from "@aws-cdk/core"
+import { App, Fn } from "aws-cdk-lib"
 import { MembershipStage } from "./membership-stage"
-import { MemberCredentials, StoreType} from "./member-credentials"
+import { MemberCredentials, StoreType} from "../../credentials/infrastructure/member-credentials"
 import { EventListenerQueueStack } from "../features/member/component-tests/helpers/event-listener-queue-stack"
 
 const app = new App()

@@ -1,14 +1,15 @@
 
-import { Construct, Duration, StackProps } from "@aws-cdk/core"
-import { SpecRestApi, ApiDefinition } from "@aws-cdk/aws-apigateway"
-import { Function, Runtime } from "@aws-cdk/aws-lambda"
-import {NodejsFunction} from "@aws-cdk/aws-lambda-nodejs"
+import { Duration, StackProps } from "aws-cdk-lib"
+import { Construct } from "constructs"
+import { SpecRestApi, ApiDefinition } from "aws-cdk-lib/aws-apigateway"
+import { Function, Runtime } from "aws-cdk-lib/aws-lambda"
+import {NodejsFunction} from "aws-cdk-lib/aws-lambda-nodejs"
 import {EnvvarsStack} from "./envvars-stack"
 import {OpenAPISpecBuilder, HttpMethod} from "../infrastructure/open-api-spec"
 import { APIGatewayRequestValidator } from "../infrastructure/api-gateway-request-validator"
 import { APIGatewayRequestValidators } from "../infrastructure/api-gateway-request-validators"
 import { APIGatewayLambdaIntegration } from "../infrastructure/api-gateway-lambda-integration"
-import { Role, ServicePrincipal, PolicyStatement } from "@aws-cdk/aws-iam"
+import { Role, ServicePrincipal, PolicyStatement } from "aws-cdk-lib/aws-iam"
 
 interface LambdaEndpointProps extends StackProps {
   name: string
@@ -40,11 +41,13 @@ export class LambdaEndpoint extends EnvvarsStack {
 
     this.generateAWSOpenAPIExtensions(apiRole, specBuilder)
 
+    const openAPI = specBuilder.build()
+    
     this.restApi = new SpecRestApi(
       this, 
       this.buildConstructName("Api", props),
       {
-        apiDefinition: ApiDefinition.fromInline(specBuilder.build()),
+        apiDefinition: ApiDefinition.fromInline(openAPI),
         deployOptions: {
           stageName: props.stageName
         }
@@ -52,8 +55,10 @@ export class LambdaEndpoint extends EnvvarsStack {
     ) 
 
     this.restApi.node.addDependency(this.lambda)
+
+    const endpointPath = Object.keys(openAPI.paths)[0]
     
-    this.addEnvvar(props.name + "Endpoint", this.restApi.urlForPath("\/") + "member/signup")
+    this.addEnvvar(props.name + "Endpoint", this.restApi.urlForPath(endpointPath))
   }
 
   private buildConstructName(constructType: string, props: LambdaEndpointProps) {

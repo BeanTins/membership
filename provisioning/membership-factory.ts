@@ -1,4 +1,4 @@
-import { Construct } from "@aws-cdk/core"
+import { Construct } from "constructs"
 import { MembershipStage } from "./membership-stage"
 import { StageFactory } from "./pipeline-builder/stage-factory"
 import { DeploymentStage } from "./pipeline-builder/deployment-stage"

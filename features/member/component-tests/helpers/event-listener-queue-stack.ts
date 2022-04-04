@@ -1,6 +1,6 @@
-import { Queue } from "@aws-cdk/aws-sqs"
-import { Stack, App, StackProps, CfnOutput, Duration} from "@aws-cdk/core"
-import {ServicePrincipal} from "@aws-cdk/aws-iam"
+import { Queue } from "aws-cdk-lib/aws-sqs"
+import { Stack, App, StackProps, CfnOutput, Duration} from "aws-cdk-lib"
+import {ServicePrincipal} from "aws-cdk-lib/aws-iam"
 
 interface EventListenerQueueProps extends StackProps {
   stageName: string

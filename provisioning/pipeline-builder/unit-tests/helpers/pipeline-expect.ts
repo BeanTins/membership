@@ -1,5 +1,5 @@
 import { PipelineStack } from "../../pipeline-stack"
-import { Template, Match, Capture } from "@aws-cdk/assertions"
+import { Template, Match, Capture } from "aws-cdk-lib/assertions"
 
 export function expectCommandsToContain(stack: PipelineStack, commands: string[]) {
   const template = Template.fromStack(stack)

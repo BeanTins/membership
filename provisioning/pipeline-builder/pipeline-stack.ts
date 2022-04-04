@@ -1,10 +1,11 @@
-import { Construct, Stack, RemovalPolicy, CfnOutput, Stage } from "@aws-cdk/core"
-import { CodePipeline, CodePipelineSource, CodeBuildStep, ManualApprovalStep } from "@aws-cdk/pipelines"
-import { ReportGroup, BuildSpec } from "@aws-cdk/aws-codebuild"
-import { Bucket } from "@aws-cdk/aws-s3"
+import { Stack, RemovalPolicy, CfnOutput } from "aws-cdk-lib"
+import { Construct } from "constructs"
+import { CodePipeline, CodePipelineSource, CodeBuildStep, ManualApprovalStep } from "aws-cdk-lib/pipelines"
+import { ReportGroup, BuildSpec } from "aws-cdk-lib/aws-codebuild"
+import { Bucket } from "aws-cdk-lib/aws-s3"
 import { StageFactory } from "./stage-factory"
 import { DeploymentStage } from "./deployment-stage"
-import { Role, ServicePrincipal, PolicyStatement, Effect } from "@aws-cdk/aws-iam"
+import { Role, ServicePrincipal, PolicyStatement, Effect } from "aws-cdk-lib/aws-iam"
 
 export enum SCM {
   GitHub = 1
@@ -31,7 +32,7 @@ export interface ReportingProperties {
 }
 
 export interface ExecutionStageProperties {
-  readonly extractingSourceFrom: SourceCodeProperties
+  readonly extractingSourceFrom: SourceCodeProperties[]
   readonly executingCommands: string[]
   readonly reporting?: ReportingProperties
 }
@@ -81,7 +82,6 @@ export class PipelineStack extends Stack {
     super(scope, id)
     this.stageFactory = stageFactory
     this.deferredReportGroupPermissionChanges = new Array()
-    this.deferredReportGroupPermissionChanges = new Array()
 
     const pipeline = new CodePipeline(this, "Pipeline", {
       pipelineName: props.name,
@@ -128,10 +128,10 @@ export class PipelineStack extends Stack {
   }
 
   private buildAcceptanceStageStep(props: AcceptanceStageProperties, deployedInfrastructure: DeploymentStage) {
-    let buildStepSetup: any = {
-      input: this.buildSourceCode(props),
-      commands: props.executingCommands
-    }
+
+    let buildStepSetup: any = this.buildStepSetupForSourceCode(props.extractingSourceFrom)
+
+    buildStepSetup["commands"] = props.executingCommands
 
     let reportGroup: ReportGroup | undefined 
 
@@ -185,14 +185,40 @@ export class PipelineStack extends Stack {
     return exportEnvCommands
   }
 
+  private buildAdditionalInput(sourceCodeProperties: SourceCodeProperties[], sourceCodeList: CodePipelineSource[])
+  {
+    let additionalInputs: Record<string, CodePipelineSource>|undefined = undefined
+
+    if (sourceCodeList.length > 1)
+    {
+      additionalInputs = {}
+
+      for (let index = 1; index < sourceCodeProperties.length; index++)
+      {
+        additionalInputs[sourceCodeProperties[index].repository] = sourceCodeList[index]
+      }
+    }
+
+    return additionalInputs
+  }
+
+  private buildStepSetupForSourceCode(sourceCodePropertiesList: SourceCodeProperties[])
+  {
+    const sourceCodeList = this.buildSourceCode(sourceCodePropertiesList)
+
+    const additionalInputs = this.buildAdditionalInput(sourceCodePropertiesList, sourceCodeList)
+
+    return {
+      input: sourceCodeList[0],
+      additionalInputs: additionalInputs,
+    }
+  }
+
   private buildCommitStageStep(commitStageProps: CommitStageProperties) {
     
-    const commands = [this.buildStageEnvVarCommand("commit"),...commitStageProps.executingCommands]
+    let buildStepSetup: any = this.buildStepSetupForSourceCode(commitStageProps.extractingSourceFrom)
 
-    let buildStepSetup: any = {
-      input: this.buildSourceCode(commitStageProps),
-      commands: commands
-    }
+    buildStepSetup["commands"] = [this.buildStageEnvVarCommand("commit"),...commitStageProps.executingCommands]
 
     let reportGroup: ReportGroup | undefined 
 
@@ -208,21 +234,24 @@ export class PipelineStack extends Stack {
     return "export PipelineStage=" + stage
   }
 
-  private buildSourceCode(commitStageProps: CommitStageProperties) {
-    const sourceCodeProp = commitStageProps.extractingSourceFrom
-    let sourceCode
-
-    if (this.cachedSources.has(JSON.stringify(sourceCodeProp))){
-      sourceCode = this.cachedSources.get(JSON.stringify(sourceCodeProp))
-    }
-    else
+  private buildSourceCode(sourceCodePropertiesList: SourceCodeProperties[]): CodePipelineSource[] {
+    let sourceCodeList: CodePipelineSource[] = []
+    
+    for (const sourceCodeProp of sourceCodePropertiesList)
     {
-      sourceCode = CodePipelineSource.gitHub(sourceCodeProp.owner + "/" + sourceCodeProp.repository,
-        sourceCodeProp.branch)
+      if (this.cachedSources.has(JSON.stringify(sourceCodeProp))){
+        sourceCodeList.push(this.cachedSources.get(JSON.stringify(sourceCodeProp))!)
+      }
+      else
+      {
+        const sourceCode = CodePipelineSource.gitHub(sourceCodeProp.owner + "/" + sourceCodeProp.repository,
+          sourceCodeProp.branch)
 
-      this.cachedSources.set(JSON.stringify(sourceCodeProp), sourceCode)
+        this.cachedSources.set(JSON.stringify(sourceCodeProp), sourceCode)
+        sourceCodeList.push(sourceCode)
+      }
     }
-    return sourceCode
+    return sourceCodeList
   }
 
   private buildBuildStep(name: string, buildStepSetup: any, reportGroup: ReportGroup | undefined) {

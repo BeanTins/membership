@@ -1,7 +1,7 @@
 import { SCM } from "../pipeline-stack"
 import { PipelineBuilder } from "../pipeline-builder"
-import { Template, Match, Capture } from "@aws-cdk/assertions"
-import { App } from "@aws-cdk/core"
+import { Template, Match, Capture } from "aws-cdk-lib/assertions"
+import { App } from "aws-cdk-lib"
 import { TestStageFactory } from "./helpers/test-stage-factory"
 import { expectAndFindPipelineStage, 
          expectActionsToContainPartialMatch, 
@@ -33,7 +33,7 @@ test("Pipeline without commit stage reports exception", () => {
 test("Pipeline with source from github", () => {
   pipelineBuilder.withName("MembershipPipeline")
   pipelineBuilder.withCommitStage(
-    {extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
+    {extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"}],
      executingCommands: []})
 
   const stack = pipelineBuilder.build()
@@ -45,9 +45,33 @@ test("Pipeline with source from github", () => {
                                      {Owner: "BeanTins", Repo: "membership", Branch: "main"})
 })
 
+test("Pipeline with 2 sources from github", () => {
+  pipelineBuilder.withName("MembershipPipeline")
+  pipelineBuilder.withCommitStage(
+    {extractingSourceFrom: [
+      {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
+      {provider: SCM.GitHub, owner: "BeanTins", repository: "credentials", branch: "main"}],
+     executingCommands: []})
+
+  const stack = pipelineBuilder.build()
+
+  console.log(stack)
+
+  console.log(JSON.stringify(Template.fromStack(stack)))
+
+  const stageActions = expectAndFindPipelineStage(stack, "Source")
+
+  expectActionsToContainPartialMatch(stageActions, "ActionTypeId", {Provider: "GitHub"})
+  expectActionsToContainPartialMatch(stageActions, "Configuration", 
+                                     {Owner: "BeanTins", Repo: "membership", Branch: "main"})
+  expectActionsToContainPartialMatch(stageActions, "Configuration", 
+                                     {Owner: "BeanTins", Repo: "credentials", Branch: "main"})
+
+})
+
 test("Pipeline with stage export", () => {
   pipelineBuilder.withName("MembershipPipeline")
-  pipelineBuilder.withCommitStage({extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
+  pipelineBuilder.withCommitStage({extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"}],
                                    executingCommands: []})
 
   const stack = pipelineBuilder.build()
@@ -58,7 +82,7 @@ test("Pipeline with stage export", () => {
 
 test("Pipeline with commands to build", () => {
   pipelineBuilder.withName("MembershipPipeline")
-  pipelineBuilder.withCommitStage({extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
+  pipelineBuilder.withCommitStage({extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"}],
                                    executingCommands: ["npm ci"]})
 
   const stack = pipelineBuilder.build()
@@ -70,7 +94,7 @@ test("Pipeline with unit test reports", () => {
   pipelineBuilder.withName("MembershipPipeline")
   pipelineBuilder.withCommitStage(
     {
-      extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
+      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"}],
       executingCommands: ["npm ci"],
       reporting: {fromDirectory: "reports/unit-tests", withFiles: ["test-results.xml"]}
     }
@@ -97,7 +121,7 @@ test("Pipeline with report creation permissions", () => {
   pipelineBuilder.withName("MembershipPipeline")
   pipelineBuilder.withCommitStage(
     {
-      extractingSourceFrom: {provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"},
+      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"}],
       executingCommands: ["npm ci"],
       reporting: {fromDirectory: "reports/unit-tests", withFiles: ["test-results.xml"]}
     }
@@ -135,7 +159,7 @@ function pipelineWithNameAndCommitStagePopulated() {
   pipelineBuilder.withName("MembershipPipeline")
   pipelineBuilder.withCommitStage(
     {
-      extractingSourceFrom: { provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main" },
+      extractingSourceFrom: [{ provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main" }],
       executingCommands: []
     })
 }

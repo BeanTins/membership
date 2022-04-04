@@ -1,5 +1,4 @@
-import {Table, AttributeType} from "@aws-cdk/aws-dynamodb"
-import {CfnOutput, Stack} from "@aws-cdk/core"
+import {CfnOutput, Stack} from "aws-cdk-lib"
 
 export class EnvvarsStack extends Stack {
   private _envvars: Record<string, CfnOutput> = {}

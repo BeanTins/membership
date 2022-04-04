@@ -4,7 +4,8 @@ import { EventPublisherStack } from "../features/member/event-publisher-stack"
 import { MembershipEventBus } from "./event-bus"
 import { MemberTable } from "./member-table"
 import { DeploymentStage } from "./pipeline-builder/deployment-stage"
-import { CfnOutput, Construct, StageProps, Stage } from "@aws-cdk/core"
+import { CfnOutput, StageProps, Stage } from "aws-cdk-lib"
+import { Construct } from "constructs"
 
 interface MembershipStageProps extends StageProps{
   stageName: string

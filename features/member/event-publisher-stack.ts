@@ -1,11 +1,12 @@
 
-import { Construct, StackProps, Stack, Duration } from "@aws-cdk/core"
-import { Function, Runtime, StartingPosition } from "@aws-cdk/aws-lambda"
-import {NodejsFunction} from "@aws-cdk/aws-lambda-nodejs"
-import { DynamoEventSource } from "@aws-cdk/aws-lambda-event-sources"
+import { StackProps, Stack, Duration } from "aws-cdk-lib"
+import { Construct } from "constructs"
+import { Function, Runtime, StartingPosition } from "aws-cdk-lib/aws-lambda"
+import {NodejsFunction} from "aws-cdk-lib/aws-lambda-nodejs"
+import { DynamoEventSource } from "aws-cdk-lib/aws-lambda-event-sources"
 import * as path from "path"
-import {Table} from "@aws-cdk/aws-dynamodb"
-import {EventBus} from "@aws-cdk/aws-events"
+import {Table} from "aws-cdk-lib/aws-dynamodb"
+import {EventBus} from "aws-cdk-lib/aws-events"
 
 interface EventPublisherStackProps extends StackProps {
   memberTable: Table;
