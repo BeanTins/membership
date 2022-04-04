@@ -3,6 +3,7 @@ import { Construct } from "constructs"
 import { CodePipeline, CodePipelineSource, CodeBuildStep, ManualApprovalStep } from "aws-cdk-lib/pipelines"
 import { ReportGroup, BuildSpec } from "aws-cdk-lib/aws-codebuild"
 import { Bucket } from "aws-cdk-lib/aws-s3"
+import { SecretValue } from "aws-cdk-lib"
 import { StageFactory } from "./stage-factory"
 import { DeploymentStage } from "./deployment-stage"
 import { Role, ServicePrincipal, PolicyStatement, Effect } from "aws-cdk-lib/aws-iam"
@@ -245,7 +246,7 @@ export class PipelineStack extends Stack {
       else
       {
         const sourceCode = CodePipelineSource.gitHub(sourceCodeProp.owner + "/" + sourceCodeProp.repository,
-          sourceCodeProp.branch)
+          sourceCodeProp.branch, {authentication: SecretValue.secretsManager("github-access-token")})
 
         this.cachedSources.set(JSON.stringify(sourceCodeProp), sourceCode)
         sourceCodeList.push(sourceCode)
