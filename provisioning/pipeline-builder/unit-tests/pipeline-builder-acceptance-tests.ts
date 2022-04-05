@@ -1,6 +1,6 @@
 import { SCM, ExportType } from "../pipeline-stack"
 import { PipelineBuilder } from "../pipeline-builder"
-import { App, RemovalPolicy } from "aws-cdk-lib"
+import { App } from "aws-cdk-lib"
 import { Template, Match, Capture } from "aws-cdk-lib/assertions"
 import { TestStageFactory } from "./helpers/test-stage-factory"
 import { expectAndFindPipelineStage, 
@@ -18,70 +18,59 @@ beforeEach(() => {
   pipelineBuilder.withName("MembershipPipeline")
   pipelineBuilder.withCommitStage(
     {
-      extractingSourceFrom: [{ provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main" }],
+      extractingSourceFrom: [{ provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: "arn:scmconnection"}],
       executingCommands: []
     })
 })
 
 test("Pipeline with own source from github", () => {
   pipelineBuilder.withAcceptanceStage(
-    {extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership-e2e-tests", branch: "main"}],
-     executingCommands: []})
-
-  const template = Template.fromStack(pipelineBuilder.build())
-
-  template.hasResourceProperties("AWS::CodePipeline::Pipeline", {
-    Stages: Match.arrayWith([
-      Match.objectLike({
-        "Name": "Source", 
-        "Actions": Match.arrayWith([
-          Match.objectLike({
-            Configuration: Match.objectLike({
-              Owner: "BeanTins",
-              Repo: "membership-e2e-tests",
-              Branch: "main"}),
-            ActionTypeId: Match.objectLike({Provider: "GitHub"})
-           })
-         ])
-       })
-    ])
-  })
-})
-
-test("Pipeline with same source as commit", () => {
-  pipelineBuilder.withAcceptanceStage(
-    {extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"}],
+    {extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership-e2e-tests", branch: "main", accessIdentifier: "arn:scmconnection"}],
      executingCommands: []})
 
   const stack = pipelineBuilder.build()
 
   const stageActions = expectAndFindPipelineStage(stack, "Source")
 
-  expectActionsToContainPartialMatch(stageActions, "ActionTypeId", {Provider: "GitHub"})
+  expectActionsToContainPartialMatch(stageActions, "ActionTypeId", {Provider: "CodeStarSourceConnection"})
   expectActionsToContainPartialMatch(stageActions, "Configuration", 
-                                     {Owner: "BeanTins", Repo: "membership", Branch: "main"})
+                                     {FullRepositoryId: "BeanTins/membership-e2e-tests", BranchName: "main", ConnectionArn:"arn:scmconnection"})
+})
+
+test("Pipeline with same source as commit", () => {
+  pipelineBuilder.withAcceptanceStage(
+    {extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: "arn:scmconnection"}],
+     executingCommands: []})
+
+  const stack = pipelineBuilder.build()
+
+  const stageActions = expectAndFindPipelineStage(stack, "Source")
+
+  expectActionsToContainPartialMatch(stageActions, "ActionTypeId", {Provider: "CodeStarSourceConnection"})
+  expectActionsToContainPartialMatch(stageActions, "Configuration", 
+                                     {FullRepositoryId: "BeanTins/membership", BranchName: "main", ConnectionArn:"arn:scmconnection"})
 })
 
 test("Pipeline with source from github", () => {
   pipelineBuilder.withName("MembershipPipeline")
   pipelineBuilder.withAcceptanceStage(
-    {extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"}],
+    {extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: "arn:scmconnection"}],
      executingCommands: []})
 
   const stack = pipelineBuilder.build()
 
   const stageActions = expectAndFindPipelineStage(stack, "Source")
 
-  expectActionsToContainPartialMatch(stageActions, "ActionTypeId", {Provider: "GitHub"})
+  expectActionsToContainPartialMatch(stageActions, "ActionTypeId", {Provider: "CodeStarSourceConnection"})
   expectActionsToContainPartialMatch(stageActions, "Configuration", 
-                                     {Owner: "BeanTins", Repo: "membership", Branch: "main"})
+                                     {FullRepositoryId: "BeanTins/membership", BranchName: "main", ConnectionArn:"arn:scmconnection"})
 })
 
 test("Pipeline with stage export", () => {
 
   pipelineBuilder.withAcceptanceStage(
     {
-      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"}],
+      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: "arn:scmconnection"}],
       executingCommands: [],
     }
   )
@@ -96,7 +85,7 @@ test("Pipeline with commands", () => {
 
   pipelineBuilder.withAcceptanceStage(
     {
-      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"}],
+      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: "arn:scmconnection"}],
       executingCommands: ["npm run test:component"],
     }
   )
@@ -111,7 +100,7 @@ test("Pipeline with deployment", () => {
 
   pipelineBuilder.withAcceptanceStage(
     {
-      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"}],
+      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: "arn:scmconnection"}],
       executingCommands: ["npm run test:component"],
     }
   )
@@ -129,7 +118,7 @@ test("Pipeline with deployment", () => {
 test("Pipeline with acceptance stage component test reporting", () => {
   pipelineBuilder.withAcceptanceStage(
     {
-      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"}],
+      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: "arn:scmconnection"}],
       executingCommands: ["npm run test:component"],
       reporting: {fromDirectory: "reports/component-tests", withFiles: ["test-results.xml"]}
     }
@@ -154,7 +143,7 @@ test("Pipeline with acceptance stage component test reporting", () => {
 test("Pipeline with acceptance stage component test exporting", () => {
   pipelineBuilder.withAcceptanceStage(
     {
-      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"}],
+      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: "arn:scmconnection"}],
       executingCommands: ["npm run test:component"],
       reporting: 
       {fromDirectory: "reports/component-tests", withFiles: ["test-results.xml"], exportingTo: ExportType.S3}
@@ -175,7 +164,7 @@ test("Pipeline with report creation permissions", () => {
   pipelineBuilder.withName("MembershipPipeline")
   pipelineBuilder.withAcceptanceStage(
     {
-      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"}],
+      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: "arn:scmconnection"}],
       executingCommands: ["npm ci"],
       reporting: {fromDirectory: "reports/unit-tests", withFiles: ["test-results.xml"]}
     }
@@ -209,7 +198,7 @@ test("Pipeline with endpoints as environment variables", () => {
   pipelineBuilder.withName("MembershipPipeline")
   pipelineBuilder.withAcceptanceStage(
     {
-      extractingSourceFrom: [{ provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main" }],
+      extractingSourceFrom: [{ provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: "arn:scmconnection" }],
       executingCommands: ["npm run test:component"],
       exposingEnvVars: true
     })
@@ -243,7 +232,7 @@ test("Pipeline with access to test resources", () => {
 
   pipelineBuilder.withAcceptanceStage(
     {
-      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"}],
+      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: "arn:scmconnection"}],
       executingCommands: ["npm run test:component"],
       withPermissionToAccess: [{resource: "TestResource", withAllowableOperations: ["dynamodb:*"]}]
     }
@@ -265,7 +254,7 @@ test("Pipeline with custom definition", () => {
 
   pipelineBuilder.withAcceptanceStage(
     {
-      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"}],
+      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: "arn:scmconnection"}],
       executingCommands: ["npm run test:component"],
       withCustomDefinitions: {bucketName: "newbucket"}
     }

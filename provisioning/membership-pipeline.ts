@@ -6,6 +6,7 @@ import { MembershipFactory} from "./membership-factory"
 import { StageParameters } from "../infrastructure/stage-parameters"
 import { MemberCredentials, StoreType} from "../../credentials/infrastructure/member-credentials"
 import { EventListenerQueueStack } from "../features/member/component-tests/helpers/event-listener-queue-stack"
+import {SSM} from "aws-sdk"
 
 interface StageConfiguration
 {
@@ -25,6 +26,7 @@ async function main(): Promise<void>
 
   const testConfig = getTestConfig()
   const prodConfig = await getProdConfig()
+  const sourceCodeArnConnection = await getSourceCodeArnConnection()
 
   const pipeline = new PipelineBuilder(app, membershipFactory)
 
@@ -33,14 +35,14 @@ async function main(): Promise<void>
   pipeline.withCommitStage(
     {
       extractingSourceFrom: [
-        { provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main" },
-        { provider: SCM.GitHub, owner: "BeanTins", repository: "credentials", branch: "main" }],
+        { provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: sourceCodeArnConnection },
+        { provider: SCM.GitHub, owner: "BeanTins", repository: "credentials", branch: "main", accessIdentifier: sourceCodeArnConnection }],
       executingCommands: ["npm ci", "ls -R", "npm run build", "npm run test:unit", "npx cdk synth"],
       reporting: {fromDirectory: "reports/unit-tests", withFiles: ["test-results.xml"]}
     })
   pipeline.withAcceptanceStage(
     {
-      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"}],
+      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: sourceCodeArnConnection}],
       executingCommands: ["npm ci", 
       "export testQueueName=" + Fn.importValue("testListenerQueueNametest"),
       "npm run test:component"],
@@ -105,5 +107,28 @@ async function getProdConfig()
           memberTableArnIndexes: memberTableArn + "\/index\/*",
           userPoolArn: await new StageParameters("us-east-1").retrieveFromStage("userPoolArn", "prod"),
           userPoolId: await new StageParameters("us-east-1").retrieveFromStage("userPoolId", "prod")}
+}
+
+async function getSourceCodeArnConnection(): Promise<string>
+{
+  const ssm = new SSM({region: "us-east-1"})
+  let parameterValue = ""
+  var options = {
+    Name: "SourceCodeConnectionArn",
+    WithDecryption: true
+  }
+
+  try{
+    const result = await ssm.getParameter(options).promise()
+    parameterValue = result.Parameter!.Value!
+  }
+  catch (error)
+  {
+    console.error(error)
+    throw error
+  }
+
+  console.log(parameterValue)
+  return parameterValue
 }
 

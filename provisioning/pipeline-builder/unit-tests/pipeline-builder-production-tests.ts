@@ -17,12 +17,12 @@ beforeEach(() => {
   pipelineBuilder.withName("MembershipPipeline")
   pipelineBuilder.withCommitStage(
     {
-      extractingSourceFrom: [{ provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main" }],
+      extractingSourceFrom: [{ provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: "arn:scmconnection" }],
       executingCommands: []
     })
   pipelineBuilder.withAcceptanceStage(
     {
-      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main"}],
+      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: "arn:scmconnection"}],
       executingCommands: ["npm run test:component"],
     }
   )
