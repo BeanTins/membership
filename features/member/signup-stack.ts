@@ -2,7 +2,7 @@
 import { StackProps } from "aws-cdk-lib"
 import { Construct } from "constructs"
 import * as path from "path"
-import { specBuilder} from "./signup"
+import { SpecBuilderFactory} from "./signup"
 import { LambdaEndpoint } from "../../provisioning/lambda-endpoint"
 
 interface SignupStackProps extends StackProps {
@@ -19,7 +19,7 @@ export class SignupStack extends LambdaEndpoint {
        environment: {MemberTable: props.memberTable},
        stageName: props.stageName,
        entry: path.join(__dirname, "signup.ts"),
-       openAPISpec: specBuilder})
+       openAPISpec: SpecBuilderFactory.create()})
   }
 } 
 

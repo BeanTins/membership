@@ -37,7 +37,7 @@ export class StageParameters {
 
   buildStageParameterName(name: string, stage: string): string
   {
-    return name + "_" + stage
+    return name + stage
   }
 
   private getStage() {

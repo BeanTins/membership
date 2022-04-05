@@ -26,14 +26,17 @@ export class MembershipStage extends Stage implements DeploymentStage{
   constructor(scope: Construct, id: string, props: MembershipStageProps) {
     super(scope, id, props)
 
-    this.memberTable = new MemberTable(this, "Members", {postfixIdentifier: props.stageName})
+     this.memberTable = new MemberTable(this, "Members", {postfixIdentifier: props.stageName})
     
-    this.signup = new SignupStack(this, "MemberSignup", {memberTable: this.memberTable.name, stageName: props.stageName})
-    this.verify = new VerifyStack(this, "MemberVerify", 
+     this.signup = new SignupStack(this, "MemberSignup", 
+     {memberTable: this.memberTable.name, 
+      stageName: props.stageName})
+
+     this.verify = new VerifyStack(this, "MemberVerify", 
     {memberTable: this.memberTable.name,
      userPoolId: props.userPoolId})
 
-    this.eventBus = new MembershipEventBus(this, "EventBusDev", {
+    this.eventBus = new MembershipEventBus(this, "EventBus", {
       stageName: props.stageName 
     })
 
@@ -44,6 +47,7 @@ export class MembershipStage extends Stage implements DeploymentStage{
 
     this.eventPublisher = new EventPublisherStack(this, "MemberEventPublisher", 
     {memberTable: this.memberTable.memberTable,
+    eventBusName: this.eventBus.Name,
     eventBusArn: this.eventBus.Arn})
     
     this.memberTable.grantAccessTo(this.signup.lambda.grantPrincipal)

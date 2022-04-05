@@ -11,6 +11,7 @@ import {EventBus} from "aws-cdk-lib/aws-events"
 interface EventPublisherStackProps extends StackProps {
   memberTable: Table;
   eventBusArn: string
+  eventBusName: string
 }
 
 export class EventPublisherStack extends Stack {
@@ -21,7 +22,7 @@ export class EventPublisherStack extends Stack {
     super(scope, id, props)
 
     this.lambda = new NodejsFunction(this, "EventPublisherFunction", {
-      environment: {eventBusArn: props.eventBusArn, eventBusName: "MembershipDevEventBusDevEventBusdevC8CB83CB"},
+      environment: {eventBusName: props.eventBusName},
       memorySize: 1024,
       timeout: Duration.seconds(5),
       runtime: Runtime.NODEJS_14_X,

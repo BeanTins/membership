@@ -10,6 +10,7 @@ interface EventBusProps extends StackProps {
 
 export class MembershipEventBus extends Stack {
   public readonly Arn: string
+  public readonly Name: string
   private eventBus: EventBus
   constructor(scope: Construct, id: string, props: EventBusProps) {
     super(scope, id, props)
@@ -17,6 +18,7 @@ export class MembershipEventBus extends Stack {
     this.eventBus = new EventBus(this, "EventBus" + props.stageName)
 
     this.Arn = this.eventBus.eventBusArn
+    this.Name = this.eventBus.eventBusName
     new CfnOutput(this, "EventBusArn" + props.stageName, {
       value: this.eventBus.eventBusArn,
     })
@@ -25,7 +27,6 @@ export class MembershipEventBus extends Stack {
   listenOnQueueFor(queueArn: string){
 
     const queue = Queue.fromQueueArn(this, "listenerQueue", queueArn)
-
    
     new Rule(this, "ListenerQueueRule", {
       eventBus: this.eventBus,

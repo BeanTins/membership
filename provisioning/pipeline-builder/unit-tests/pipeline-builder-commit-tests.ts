@@ -55,10 +55,6 @@ test("Pipeline with 2 sources from github", () => {
 
   const stack = pipelineBuilder.build()
 
-  console.log(stack)
-
-  console.log(JSON.stringify(Template.fromStack(stack)))
-
   const stageActions = expectAndFindPipelineStage(stack, "Source")
 
   expectActionsToContainPartialMatch(stageActions, "ActionTypeId", {Provider: "GitHub"})

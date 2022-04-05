@@ -1,4 +1,3 @@
-
 import { Duration, StackProps } from "aws-cdk-lib"
 import { Construct } from "constructs"
 import { SpecRestApi, ApiDefinition } from "aws-cdk-lib/aws-apigateway"
