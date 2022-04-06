@@ -16,13 +16,19 @@ interface StageConfiguration
   userPoolId: string
 }
 
+
+interface TestResources
+{
+  testListenerQueue: EventListenerQueueStack
+}
+
 async function main(): Promise<void> 
 {
   const membershipFactory = new MembershipFactory()
 
   const app = new App()
 
-  provisionTestResources(app)
+  const testResources = provisionTestResources(app)
 
   const testConfig = getTestConfig()
   const prodConfig = await getProdConfig()
@@ -37,12 +43,15 @@ async function main(): Promise<void>
       extractingSourceFrom: [
         { provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: sourceCodeArnConnection },
         { provider: SCM.GitHub, owner: "BeanTins", repository: "credentials", branch: "main", accessIdentifier: sourceCodeArnConnection }],
-      executingCommands: ["npm ci", "ls -R", "npm run build", "npm run test:unit", "npx cdk synth"],
-      reporting: {fromDirectory: "reports/unit-tests", withFiles: ["test-results.xml"]}
+      executingCommands: ["ls", "cd membership", "npm ci", "cd ../credentials", "npm ci", "cd ../membership", "ls", "npm run build", "npm run test:unit", "npx cdk synth"],
+      reporting: {fromDirectory: "reports/unit-tests", withFiles: ["test-results.xml"]},
+      withPermissionToAccess: [
+        {resource: "*", withAllowableOperations: ["ssm:GetParameter"]}]
     })
   pipeline.withAcceptanceStage(
     {
-      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: sourceCodeArnConnection}],
+      extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: sourceCodeArnConnection},
+                            { provider: SCM.GitHub, owner: "BeanTins", repository: "credentials", branch: "main", accessIdentifier: sourceCodeArnConnection }],
       executingCommands: ["npm ci", 
       "export testQueueName=" + Fn.importValue("testListenerQueueNametest"),
       "npm run test:component"],
@@ -70,7 +79,8 @@ async function main(): Promise<void>
     }
   )
 
-  pipeline.build()
+  const pipelineStack = pipeline.build()
+  pipelineStack.addDependency(testResources.testListenerQueue)
 
   app.synth()
 }
@@ -88,6 +98,8 @@ function provisionTestResources(app: App) {
     stageName: "test",
     storeTypeForSettings: StoreType.Output
   })
+
+  return {testListenerQueue: testListenerQueue}
 }
 
 function getTestConfig()
@@ -128,7 +140,6 @@ async function getSourceCodeArnConnection(): Promise<string>
     throw error
   }
 
-  console.log(parameterValue)
   return parameterValue
 }
 

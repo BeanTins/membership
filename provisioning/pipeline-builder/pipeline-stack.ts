@@ -47,19 +47,19 @@ export interface CustomDefinitions {
   readonly [name: string]: string
 }
 
-export interface DeploymentStageProperties {
+export interface StageProperties {
   readonly withCustomDefinitions?: CustomDefinitions
   readonly withPermissionToAccess?: ResourceAccess[]
 }
 
-export interface CommitStageProperties extends ExecutionStageProperties {
+export interface CommitStageProperties extends ExecutionStageProperties, StageProperties {
 }
 
-export interface AcceptanceStageProperties extends ExecutionStageProperties, DeploymentStageProperties{
+export interface AcceptanceStageProperties extends ExecutionStageProperties, StageProperties{
   readonly exposingEnvVars?: boolean
 }
 
-export interface ProductionStageProperties extends DeploymentStageProperties{
+export interface ProductionStageProperties extends StageProperties{
   readonly manualApproval?: boolean
 }
 
@@ -212,6 +212,7 @@ export class PipelineStack extends Stack {
     return {
       input: sourceCodeList[0],
       additionalInputs: additionalInputs,
+      installCommands: ["mkdir membership", "mv $(ls . | grep -v ^membership$ | grep -v ^credentials$) membership"]
     }
   }
 
@@ -220,6 +221,9 @@ export class PipelineStack extends Stack {
     let buildStepSetup: any = this.buildStepSetupForSourceCode(commitStageProps.extractingSourceFrom)
 
     buildStepSetup["commands"] = [this.buildStageEnvVarCommand("commit"),...commitStageProps.executingCommands]
+
+    buildStepSetup["role"] = this.buildStagePermissionsRole("CommitExecutionRole", 
+    commitStageProps.withPermissionToAccess)
 
     let reportGroup: ReportGroup | undefined 
 
@@ -271,6 +275,9 @@ export class PipelineStack extends Stack {
 
     const reportBuildSpec = BuildSpec.fromObject({
       version: '0.2',
+      env: {
+          shell: "bash"
+      },
       reports: {
         [reportGroupArn]: {
           files: reporting.withFiles,
