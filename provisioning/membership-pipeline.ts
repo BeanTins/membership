@@ -43,7 +43,7 @@ async function main(): Promise<void>
       extractingSourceFrom: [
         { provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: sourceCodeArnConnection },
         { provider: SCM.GitHub, owner: "BeanTins", repository: "credentials", branch: "main", accessIdentifier: sourceCodeArnConnection }],
-      executingCommands: ["ls", "cd membership", "npm ci", "cd ../credentials", "npm ci", "cd ../membership", "ls", "npm run build", "npm run test:unit", "npx cdk synth"],
+      executingCommands: ["cd ..\/credentials", "npm ci", "npm run build", "cd - ", "npm ci", "npm run build", "npm run test:unit", "npx cdk synth"],
       reporting: {fromDirectory: "reports/unit-tests", withFiles: ["test-results.xml"]},
       withPermissionToAccess: [
         {resource: "*", withAllowableOperations: ["ssm:GetParameter"]}]

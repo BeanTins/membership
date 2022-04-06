@@ -196,7 +196,7 @@ export class PipelineStack extends Stack {
 
       for (let index = 1; index < sourceCodeProperties.length; index++)
       {
-        additionalInputs[sourceCodeProperties[index].repository] = sourceCodeList[index]
+        additionalInputs["..\/" + sourceCodeProperties[index].repository] = sourceCodeList[index]
       }
     }
 
@@ -211,8 +211,7 @@ export class PipelineStack extends Stack {
 
     return {
       input: sourceCodeList[0],
-      additionalInputs: additionalInputs,
-      installCommands: ["mkdir membership", "mv $(ls . | grep -v ^membership$ | grep -v ^credentials$) membership"]
+      additionalInputs: additionalInputs
     }
   }
 
