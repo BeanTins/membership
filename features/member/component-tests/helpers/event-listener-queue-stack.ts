@@ -15,19 +15,15 @@ export class EventListenerQueueStack extends Stack {
 
     this.queue.grantSendMessages(new ServicePrincipal("events.amazonaws.com"))
 
-    const testListenerQueueName = "testListenerQueueName" + props.stageName
-
-    new CfnOutput(this, testListenerQueueName, {
+    new CfnOutput(this, "TestListenerQueueName", {
       value: this.queue.queueName,
-      exportName: testListenerQueueName, 
+      exportName: "TestListenerQueueName", 
       description: 'name of the queue used during testing for listening to events'
     })
 
-    const testListenerQueueArn = "testListenerQueueArn" + props.stageName
-
-    new CfnOutput(this, testListenerQueueArn, {
+    new CfnOutput(this, "TestListenerQueueArn", {
       value: this.queue.queueArn,
-      exportName: testListenerQueueArn, 
+      exportName: "TestListenerQueueArn", 
       description: 'ARN of the queue used during testing for listening to events'
     })
 

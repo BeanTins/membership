@@ -24,7 +24,7 @@ export class EventListenerQueueClient {
     if (this.url == undefined)
     {
       const input = {
-        QueueName: process.env.testQueueName
+        QueueName: process.env.TestListenerQueueName,
       }
   
       try {

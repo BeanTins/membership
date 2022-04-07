@@ -21,7 +21,7 @@ const memberCredentials = new MemberCredentials(app, "MemberCredentialsDev", {
 const membershipStage = new MembershipStage(app, "MembershipDev", {
   env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
   stageName: "dev",
-  eventListenerQueueArn: Fn.importValue("testListenerQueueArndev"),
+  eventListenerQueueArn: Fn.importValue("TestListenerQueueArn"),
   userPoolId: Fn.importValue("userPoolIddev")
 })
 

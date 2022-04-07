@@ -133,16 +133,16 @@ export const MemberSteps: StepDefinitions = ({ given, and, when, then }) => {
 
 function configureProvisionedResources() {
 
-  if (process.env.signupMemberUrl == undefined) {
-    process.env.signupMemberUrl = resolveOutput("MemberSignupEndpoint")
+  if (process.env.MemberSignupEndpoint == undefined) {
+    process.env.MemberSignupEndpoint = resolveOutput("MemberSignupEndpoint")
   }
 
-  if (process.env.testQueueName == undefined) {
-    process.env.testQueueName = resolveOutput("testListenerQueueNamedev")
+  if (process.env.TestListenerQueueName == undefined) {
+    process.env.TestListenerQueueName = resolveOutput("TestListenerQueueName")
   }
 
-  if (process.env.memberTableName == undefined) {
-    process.env.memberTable = resolveOutput("MemberTable")
+  if (process.env.MemberTable == undefined) {
+    process.env.MemberTable = resolveOutput("MemberTable")
   }
 
   const userPoolName = "userPoolId" + getStage()

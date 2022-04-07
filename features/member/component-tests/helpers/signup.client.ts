@@ -15,7 +15,7 @@ export async function signupMember(name: string | null, email: string | null, lo
     }
 
     try{
-        const url = process.env.signupMemberUrl
+        const url = process.env.MemberSignupEndpoint
 
         logger.verbose("member signup url - " + url)
 

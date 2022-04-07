@@ -10,7 +10,7 @@ export class MemberTableAccessor {
   constructor(region: string)
   {
     this.dynamoDB = new DocumentClient({region: region})
-    this.memberTableName = process.env.memberTable!
+    this.memberTableName = process.env.MemberTable!
   }
 
   async clear()

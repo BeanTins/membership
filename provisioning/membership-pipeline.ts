@@ -52,18 +52,16 @@ async function main(): Promise<void>
     {
       extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: sourceCodeArnConnection},
                             { provider: SCM.GitHub, owner: "BeanTins", repository: "credentials", branch: "main", accessIdentifier: sourceCodeArnConnection }],
-      executingCommands: ["npm ci", 
-      "export testQueueName=" + Fn.importValue("testListenerQueueNametest"),
-      "npm run test:component"],
+      executingCommands: ["cd ..\/credentials", "npm ci", "cd - ", "npm ci", "npm run test:component"],
       reporting: {fromDirectory: "reports/component-tests", withFiles: ["test-results.xml", "tests.log"], exportingTo: ExportType.S3},
       exposingEnvVars: true,
       withPermissionToAccess: [
         {resource: testConfig.memberTableArn, withAllowableOperations: ["dynamodb:*"]},
         {resource: testConfig.memberTableArnIndexes, withAllowableOperations: ["dynamodb:*"]},
         {resource: testConfig.userPoolArn, withAllowableOperations: ["cognito-idp:*"]},
-        {resource: Fn.importValue("testListenerQueueArntest"), withAllowableOperations: ["sqs:*"]}],
+        {resource: Fn.importValue("TestListenerQueueArn"), withAllowableOperations: ["sqs:*"]}],
       withCustomDefinitions: {userPoolId: testConfig.userPoolId, 
-                              eventListenerQueueArn: Fn.importValue("testListenerQueueArntest")} 
+                              eventListenerQueueArn: Fn.importValue("TestListenerQueueArn")} 
     }
   )
 
