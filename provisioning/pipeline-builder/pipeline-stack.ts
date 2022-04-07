@@ -6,6 +6,7 @@ import { Bucket } from "aws-cdk-lib/aws-s3"
 import { StageFactory } from "./stage-factory"
 import { DeploymentStage } from "./deployment-stage"
 import { Role, ServicePrincipal, PolicyStatement, Effect } from "aws-cdk-lib/aws-iam"
+import { PropagatedTagSource } from "aws-cdk-lib/aws-ecs"
 
 export enum SCM {
   GitHub = 1
@@ -36,6 +37,7 @@ export interface ExecutionStageProperties {
   readonly extractingSourceFrom: SourceCodeProperties[]
   readonly executingCommands: string[]
   readonly reporting?: ReportingProperties
+  readonly withEnvironmentVariables?: Record<string, any>
 }
 
 export interface ResourceAccess {
@@ -99,24 +101,31 @@ export class PipelineStack extends Stack {
     }
 
     if (props.productionStage != undefined){
-      let stepSetup: any = {}
- 
       const productionDeploymentStage = this.stageFactory.create(this, "Production", "prod", props.productionStage.withCustomDefinitions)
-    
-      if (props.productionStage.manualApproval)
-      {
-        stepSetup["pre"] = [new ManualApprovalStep('PromoteToProduction')]
-      }
 
-      stepSetup["commands"] = [this.buildStageEnvVarCommand("prod")]
+      const buildStep = this.buildProductionStageStep(props.productionStage)
 
-      stepSetup["role"] = this.buildStagePermissionsRole("ProductionTestExecutionRole", 
-      props.productionStage.withPermissionToAccess)
-
-      pipeline.addStage(productionDeploymentStage,stepSetup)
+      pipeline.addStage(productionDeploymentStage,buildStep)
     }
 
     this.actionAnyDeferredPermissionChanges(pipeline)
+  }
+
+  private buildProductionStageStep(props: ProductionStageProperties) {
+    let stepSetup: any = {}
+
+    if (props.manualApproval) {
+      stepSetup["pre"] = [new ManualApprovalStep('PromoteToProduction')]
+    }
+
+    let commands: string[] = [this.buildStageEnvVarCommand("prod")]
+
+    stepSetup["commands"] = commands
+
+    stepSetup["role"] = this.buildStagePermissionsRole("ProductionExecutionRole",
+      props.withPermissionToAccess)
+
+    return stepSetup 
   }
 
   private actionAnyDeferredPermissionChanges(pipeline: CodePipeline) {
@@ -147,6 +156,11 @@ export class PipelineStack extends Stack {
       buildStepSetup["envFromCfnOutputs"] = deployedInfrastructure.envvars
 
       commands = commands.concat(this.buildEnvironmentVariableExportCommands(deployedInfrastructure.envvars))
+    }
+
+    if (props.withEnvironmentVariables != undefined)
+    {
+      commands = commands.concat(this.buildEnvironmentVariableCommands(props.withEnvironmentVariables))
     }
 
     buildStepSetup["commands"] = commands
@@ -186,6 +200,14 @@ export class PipelineStack extends Stack {
     return exportEnvCommands
   }
 
+  private buildEnvironmentVariableCommands(envvars: Record<string, any>) {
+    let envCommands = Array()
+    for (const [name, value] of Object.entries(envvars)) {
+      envCommands.push("export " + name + "=" + value)
+    }
+    return envCommands
+  }
+
   private buildAdditionalInput(sourceCodeProperties: SourceCodeProperties[], sourceCodeList: CodePipelineSource[])
   {
     let additionalInputs: Record<string, CodePipelineSource>|undefined = undefined
@@ -219,7 +241,15 @@ export class PipelineStack extends Stack {
     
     let buildStepSetup: any = this.buildStepSetupForSourceCode(commitStageProps.extractingSourceFrom)
 
-    buildStepSetup["commands"] = [this.buildStageEnvVarCommand("commit"),...commitStageProps.executingCommands]
+
+    let commands = [this.buildStageEnvVarCommand("commit"),...commitStageProps.executingCommands]
+
+    if (commitStageProps.withEnvironmentVariables != undefined)
+    {
+      commands = commands.concat(this.buildEnvironmentVariableCommands(commitStageProps.withEnvironmentVariables))
+    }
+
+    buildStepSetup["commands"] = commands
 
     buildStepSetup["role"] = this.buildStagePermissionsRole("CommitExecutionRole", 
     commitStageProps.withPermissionToAccess)

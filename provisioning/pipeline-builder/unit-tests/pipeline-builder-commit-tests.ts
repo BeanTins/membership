@@ -85,6 +85,17 @@ test("Pipeline with commands to build", () => {
   expectCommandsToContain(stack, ["npm ci"])
 })
 
+test("Pipeline with environment variables", () => {
+  pipelineBuilder.withName("MembershipPipeline")
+  pipelineBuilder.withCommitStage({extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: "arn:scmconnection"}],
+                                   executingCommands: ["npm ci"],
+                                  withEnvironmentVariables: {envvar1: "test1", envvar2: "test2"}})
+
+  const stack = pipelineBuilder.build()
+
+  expectCommandsToContain(stack, ["export envvar1=test1", "export envvar2=test2"])
+})
+
 test("Pipeline with unit test reports", () => {
   pipelineBuilder.withName("MembershipPipeline")
   pipelineBuilder.withCommitStage(

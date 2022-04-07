@@ -53,6 +53,9 @@ async function main(): Promise<void>
       extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: sourceCodeArnConnection},
                             { provider: SCM.GitHub, owner: "BeanTins", repository: "credentials", branch: "main", accessIdentifier: sourceCodeArnConnection }],
       executingCommands: ["cd ..\/credentials", "npm ci", "cd - ", "npm ci", "npm run test:component"],
+      withEnvironmentVariables : {TestListenerQueueNametest: Fn.importValue("TestListenerQueueNametest"),
+                                  userPoolIdtest: Fn.importValue("userPooolIdtest"),
+                                  userPoolClientIdtest: Fn.importValue("userPooolIdtest")},
       reporting: {fromDirectory: "reports/component-tests", withFiles: ["test-results.xml", "tests.log"], exportingTo: ExportType.S3},
       exposingEnvVars: true,
       withPermissionToAccess: [
