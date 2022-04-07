@@ -131,39 +131,30 @@ export const MemberSteps: StepDefinitions = ({ given, and, when, then }) => {
 
 }
 
+function configureStageEnvVar(envVarBaseName: string) {
+  const envVarName = envVarBaseName + getStage()
+
+  if (process.env[envVarName] == undefined) {
+    process.env[envVarBaseName] = resolveOutput(envVarName)
+  }
+  else {
+    process.env[envVarBaseName] = process.env[envVarName]
+  }
+
+}
+
 function configureProvisionedResources() {
 
   if (process.env.MemberSignupEndpoint == undefined) {
     process.env.MemberSignupEndpoint = resolveOutput("MemberSignupEndpoint")
   }
-
-  if (process.env.TestListenerQueueName == undefined) {
-    process.env.TestListenerQueueName = resolveOutput("TestListenerQueueName")
-  }
-
   if (process.env.MemberTable == undefined) {
     process.env.MemberTable = resolveOutput("MemberTable")
   }
 
-  const userPoolName = "userPoolId" + getStage()
-
-  if (process.env[userPoolName] == undefined) {
-    process.env.userPoolId = resolveOutput(userPoolName)
-  }
-
-  else {
-    process.env.userPoolId = process.env[userPoolName]
-  }
-
-  const userPoolClientIdName = "userPoolClientId" + getStage()
-
-  if (process.env[userPoolClientIdName] == undefined) {
-    process.env.userPoolClientId = resolveOutput(userPoolClientIdName)
-  }
-
-  else {
-    process.env.userPoolClientId = process.env[userPoolClientIdName]
-  }
+  configureStageEnvVar("TestListenerQueueName")
+  configureStageEnvVar("userPoolId")
+  configureStageEnvVar("userPoolClientId")
 }
 
 function generateEmailFromName(enteredName: string): string {

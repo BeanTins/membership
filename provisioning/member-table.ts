@@ -26,8 +26,6 @@ export class MemberTable extends EnvvarsStack {
       projectionType: ProjectionType.ALL,
     })
 
-    
-
     this.addEnvvar("MemberTable", this.memberTable.tableName)
     
     new CfnOutput(this, "MemberTableArn" + props?.postfixIdentifier, {

@@ -59,9 +59,9 @@ async function main(): Promise<void>
         {resource: testConfig.memberTableArn, withAllowableOperations: ["dynamodb:*"]},
         {resource: testConfig.memberTableArnIndexes, withAllowableOperations: ["dynamodb:*"]},
         {resource: testConfig.userPoolArn, withAllowableOperations: ["cognito-idp:*"]},
-        {resource: Fn.importValue("TestListenerQueueArn"), withAllowableOperations: ["sqs:*"]}],
+        {resource: Fn.importValue("TestListenerQueueArntest"), withAllowableOperations: ["sqs:*"]}],
       withCustomDefinitions: {userPoolId: testConfig.userPoolId, 
-                              eventListenerQueueArn: Fn.importValue("TestListenerQueueArn")} 
+                              eventListenerQueueArn: Fn.importValue("TestListenerQueueArntest")} 
     }
   )
 
