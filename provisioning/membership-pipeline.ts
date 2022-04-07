@@ -20,6 +20,7 @@ interface StageConfiguration
 interface TestResources
 {
   testListenerQueue: EventListenerQueueStack
+  memberCredentials: MemberCredentials
 }
 
 async function main(): Promise<void> 
@@ -82,6 +83,7 @@ async function main(): Promise<void>
 
   const pipelineStack = pipeline.build()
   pipelineStack.addDependency(testResources.testListenerQueue)
+  pipelineStack.addDependency(testResources.memberCredentials)
 
   app.synth()
 }
@@ -100,7 +102,7 @@ function provisionTestResources(app: App) {
     storeTypeForSettings: StoreType.Output
   })
 
-  return {testListenerQueue: testListenerQueue}
+  return {testListenerQueue: testListenerQueue, memberCredentials: memberCredentials}
 }
 
 function getTestConfig()
