@@ -272,6 +272,7 @@ test("Pipeline with custom definition", () => {
 test("Pipeline with environment variables", () => {
   pipelineBuilder.withAcceptanceStage({extractingSourceFrom: [{provider: SCM.GitHub, owner: "BeanTins", repository: "membership", branch: "main", accessIdentifier: "arn:scmconnection"}],
                                    executingCommands: ["npm ci"],
+                                   exposingEnvVars: true,
                                   withEnvironmentVariables: {envvar1: "test1", envvar2: "test2"}})
 
   const stack = pipelineBuilder.build()

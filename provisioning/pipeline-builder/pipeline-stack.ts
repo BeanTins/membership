@@ -150,7 +150,7 @@ export class PipelineStack extends Stack {
       buildStepSetup["partialBuildSpec"] = this.buildReportingSpec(reportGroup.reportGroupArn, props.reporting)
     }
 
-    let commands: string[] = [this.buildStageEnvVarCommand("test"), ...props.executingCommands]
+    let commands: string[] = [this.buildStageEnvVarCommand("test")]
 
     if(props.exposingEnvVars){
       buildStepSetup["envFromCfnOutputs"] = deployedInfrastructure.envvars
@@ -162,6 +162,8 @@ export class PipelineStack extends Stack {
     {
       commands = commands.concat(this.buildEnvironmentVariableCommands(props.withEnvironmentVariables))
     }
+
+    commands = commands.concat(props.executingCommands)
 
     buildStepSetup["commands"] = commands
 
@@ -242,12 +244,14 @@ export class PipelineStack extends Stack {
     let buildStepSetup: any = this.buildStepSetupForSourceCode(commitStageProps.extractingSourceFrom)
 
 
-    let commands = [this.buildStageEnvVarCommand("commit"),...commitStageProps.executingCommands]
+    let commands = [this.buildStageEnvVarCommand("commit")]
 
     if (commitStageProps.withEnvironmentVariables != undefined)
     {
       commands = commands.concat(this.buildEnvironmentVariableCommands(commitStageProps.withEnvironmentVariables))
     }
+
+    commands = commands.concat(commitStageProps.executingCommands)
 
     buildStepSetup["commands"] = commands
 
